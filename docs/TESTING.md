@@ -64,6 +64,7 @@ Each takes about two minutes. Open the preview link (see `docs/REVIEW-AND-CI.md`
 | L2 | Typing is safe | If a text field exists, type letters into it. | No notes play while typing. |
 | L3 | Modes | Switch Beginner, Standard, Pro, reload the page. | The choice persists; what is shown changes; nothing you made is lost. |
 | L4 | Output devices | Play through speakers, then headphones. | No distortion at normal volume; level is sensible. |
+| L1b | Firefox | Repeat L1 in a real Firefox. | CI's headless Firefox read silence (see `docs/REVIEW-AND-CI.md`); this tells us whether it is a real bug or only the runner. |
 | L5 | USB MIDI keyboard | Not built yet. Skip until the roadmap item ships. | n/a |
 
 When a new feature ships it adds its own rows here in the same change.

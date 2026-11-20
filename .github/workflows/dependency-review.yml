@@ -8,10 +8,13 @@ permissions:
 
 jobs:
   review:
+    # Needs the repository's Dependency graph switched on (Settings > Advanced Security); without it
+    # the action errors on every PR. Set the repository variable DEPENDENCY_GRAPH_ENABLED=true after.
+    if: vars.DEPENDENCY_GRAPH_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
