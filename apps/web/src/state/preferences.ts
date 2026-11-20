@@ -3,8 +3,8 @@
  * throw or come back empty in private windows); an account will sync them later.
  * The mode is a preference, not project data: see docs/ARCHITECTURE.md section 5b.
  */
-import { MODE_DEFAULTS, isMode, type Mode } from '@forge/shared';
-import { applyDensity, applyTheme, type Density, type Theme } from '@forge/ui';
+import { MODE_DEFAULTS, isMode, type Mode } from '@pro-studio/shared';
+import { applyDensity, applyTheme, type Density, type Theme } from '@pro-studio/ui';
 
 export interface Preferences {
   mode: Mode;
@@ -13,7 +13,7 @@ export interface Preferences {
   density: Density | 'auto';
 }
 
-const STORAGE_KEY = 'forge.preferences.v1';
+const STORAGE_KEY = 'prostudio.preferences.v1';
 const DEFAULTS: Preferences = { mode: 'standard', theme: 'dark', density: 'auto' };
 
 function load(): Preferences {

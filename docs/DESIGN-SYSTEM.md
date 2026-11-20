@@ -34,7 +34,7 @@ Inter for the interface, JetBrains Mono for numbers and technical readouts (`.t-
 
 Compact is the default: control height 28 px, row 30 px, panel header 32 px, top bar 48 px. `data-density="comfortable"` raises these to 40 / 40 / 40 / 56 and the minimum hit target to 44 px for touch and accessibility. The standard's 40 px control is therefore the comfortable setting, not the default, a documented deviation (see ARCHITECTURE section 8).
 
-Each mode sets a default density (`MODE_DEFAULTS` in `@forge/shared`): Beginner comfortable, Standard and Pro compact. The user can override it independently of the mode.
+Each mode sets a default density (`MODE_DEFAULTS` in `@pro-studio/shared`): Beginner comfortable, Standard and Pro compact. The user can override it independently of the mode.
 
 ## Accessibility is enforced, not hoped for
 
@@ -48,7 +48,7 @@ Currently 99 pairs per theme pass. Add a pair to the script when you add a token
 
 Other rules: one focus style for the whole product (`:focus-visible`, 2 px, `--focus-ring`); no status by colour alone (every meter and state also has a shape, label or position cue); every icon-only control has an accessible name.
 
-## Components (planned in `@forge/ui`, Phase 1)
+## Components (planned in `@pro-studio/ui`, Phase 1)
 
 Button (primary, secondary, ghost, danger, icon, toggle), Knob, Fader, Meter, Slider, NumberField (drag to scrub, type to enter), Select, Tabs, Panel (header, maximize, collapse), Splitter, Toolbar, Tooltip, Menu and ContextMenu, Dialog, Toast, CommandPalette, Icon. Each ships with default, hover, focus-visible, pressed, disabled, selected and error states, a Testing Library test and a keyboard test. Knobs and faders are real ARIA sliders: arrow keys, Home/End, Page keys, and `Shift` for fine adjustment.
 

@@ -1,6 +1,6 @@
 /**
- * @forge/ui: design tokens and (soon) the component library.
- * Import the stylesheet once at the app root:  import '@forge/ui/styles/index.css'
+ * @pro-studio/ui: design tokens and (soon) the component library.
+ * Import the stylesheet once at the app root:  import '@pro-studio/ui/styles/index.css'
  */
 
 /** Names of the 12 channel colours, so UI code never hardcodes a hex. */

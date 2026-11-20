@@ -1,5 +1,5 @@
 {
-  "name": "@forge/web",
+  "name": "@pro-studio/web",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,8 +13,8 @@
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.0",
     "@fontsource-variable/jetbrains-mono": "^5.1.0",
-    "@forge/shared": "workspace:*",
-    "@forge/ui": "workspace:*",
+    "@pro-studio/shared": "workspace:*",
+    "@pro-studio/ui": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

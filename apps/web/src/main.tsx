@@ -1,6 +1,6 @@
 import '@fontsource-variable/inter';
 import '@fontsource-variable/jetbrains-mono';
-import '@forge/ui/styles/index.css';
+import '@pro-studio/ui/styles/index.css';
 import './app.css';
 import './state/preferences'; // applies the saved theme and density before the first paint
 import { StrictMode } from 'react';

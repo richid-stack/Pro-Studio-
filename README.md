@@ -1,8 +1,6 @@
-# Forge
+# Pro Studio
 
 A browser-first beatmaking studio for **trap, drill, R&B and Afrobeat**, built to be a real product (web first, desktop later) and to give a first-time producer the tools to make an industry-level beat while giving experienced producers more control than the mainstream DAWs.
-
-> Working title. The name lives in one constant (`apps/web/src/App.tsx`) and `apps/web/index.html`.
 
 ## Status
 

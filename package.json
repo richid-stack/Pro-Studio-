@@ -1,5 +1,5 @@
 {
-  "name": "forge-studio",
+  "name": "pro-studio",
   "private": true,
   "version": "0.0.0",
   "description": "Browser-first beatmaking studio for trap, drill, R&B and Afrobeat.",
@@ -8,14 +8,14 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "pnpm --filter @forge/web dev",
+    "dev": "pnpm --filter @pro-studio/web dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "contrast": "pnpm --filter @forge/ui contrast",
+    "contrast": "pnpm --filter @pro-studio/ui contrast",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "e2e": "pnpm --filter @forge/web e2e"
+    "e2e": "pnpm --filter @pro-studio/web e2e"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

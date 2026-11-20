@@ -1,12 +1,12 @@
 # Architecture
 
-Forge is a browser-first beatmaking workstation (trap, drill, R&B, Afrobeat) that is built to ship as a product and to be wrapped in a desktop shell later. This document is the source of truth for how it is put together. Change it in the same PR as the code it describes.
+Pro Studio is a browser-first beatmaking workstation (trap, drill, R&B, Afrobeat) that is built to ship as a product and to be wrapped in a desktop shell later. This document is the source of truth for how it is put together. Change it in the same PR as the code it describes.
 
 Status legend: **built** = in the repo and tested, **planned** = decided but not written.
 
 ## 1. Principles
 
-1. **The document is the product.** A project is plain JSON (`@forge/shared` `Project`, schema-versioned). The UI, the audio engine, undo/redo, autosave, sync and export all read and write that one model. No state lives only in a DOM node or an audio node.
+1. **The document is the product.** A project is plain JSON (`@pro-studio/shared` `Project`, schema-versioned). The UI, the audio engine, undo/redo, autosave, sync and export all read and write that one model. No state lives only in a DOM node or an audio node.
 2. **Audio never waits for the UI.** Sound is produced on the audio thread (AudioWorklet). The UI thread sends commands and receives meters and playhead positions. A slow React render must never cause a glitch.
 3. **Pure logic is a package with tests, not code inside a component.** Music theory, keyboard mapping and sample analysis already live in packages and run under `node:test` with no browser.
 4. **Local-first.** Everything works offline and saves to the device. The cloud adds sync, sharing and AI; it is never required to make a beat.
@@ -31,7 +31,7 @@ prototype/        The single-file artifact prototype, kept as a reference for so
 docs/             This folder.
 ```
 
-Dependency direction is one way: `apps/*` -> `@forge/ui`, `@forge/engine` -> `@forge/shared`. `@forge/shared` imports nothing. CI should fail a PR that adds a reverse import.
+Dependency direction is one way: `apps/*` -> `@pro-studio/ui`, `@pro-studio/engine` -> `@pro-studio/shared`. `@pro-studio/shared` imports nothing. CI should fail a PR that adds a reverse import.
 
 Packages resolve through `tsconfig.base.json` `paths` to `src/index.ts`, so there is no build step between packages in development and typechecking works without installing anything.
 
@@ -40,7 +40,7 @@ Packages resolve through `tsconfig.base.json` `paths` to `src/index.ts`, so ther
 ```
             UI thread (React)                                  Audio thread
   ┌─────────────────────────────────────┐             ┌──────────────────────────────┐
-  │ Canvas views (roll, playlist)       │             │ AudioWorklet "forge-engine"   │
+  │ Canvas views (roll, playlist)       │             │ AudioWorklet "pro-studio-engine"   │
   │ React panels (browser, mixer, ...)  │  commands   │  - transport + sample clock   │
   │ Project store  ──patches──► Engine  ├────────────►│  - voices (drums, 808, synth, │
   │ client (typed message protocol)     │  SAB ring   │    sampler)                   │
@@ -62,7 +62,7 @@ Packages resolve through `tsconfig.base.json` `paths` to `src/index.ts`, so ther
 - Draw only the visible window (virtualized by time and pitch). Redraw on demand: when the store changes, the view scrolls or zooms, or the playhead moves. No idle redraw loop.
 - Hit-testing is done in model space (time, pitch) from pointer coordinates, not by reading pixels. That is what makes marquee select, edge-resize, velocity lane editing and snapping testable without a browser.
 - Canvas content is not accessible by default, so every canvas view has a parallel accessible model: a focusable grid with arrow-key navigation, announced note names and a note list, so the roll is usable with a keyboard and screen reader.
-- Panels are React and DOM. They use `@forge/ui` components and tokens only.
+- Panels are React and DOM. They use `@pro-studio/ui` components and tokens only.
 
 ## 5. Workspace (Phase 1)
 
@@ -75,7 +75,7 @@ Panels (Browser, Channel rack, Piano roll, Playlist, Mixer, Inspector) live in a
 
 ## 5b. Experience modes: Beginner, Standard, Pro
 
-One engine and one project format, three levels of interface. Implemented as a registry in `@forge/shared` (`modes.ts`, tested) that the UI queries with `isFeatureVisible(id, mode)`.
+One engine and one project format, three levels of interface. Implemented as a registry in `@pro-studio/shared` (`modes.ts`, tested) that the UI queries with `isFeatureVisible(id, mode)`.
 
 | Mode | For | What changes |
 | --- | --- | --- |
@@ -96,7 +96,7 @@ Rules:
 | Layer | Technology | Phase |
 | --- | --- | --- |
 | Working copy and autosave | IndexedDB / OPFS, every change debounced, crash-safe | 1 |
-| Project file | `.forge` = zip of `project.json` + referenced sample blobs | 2 |
+| Project file | `.prostudio` = zip of `project.json` + referenced sample blobs | 2 |
 | Sample library | OPFS blobs + IndexedDB metadata (tags, BPM, key, waveform peaks) | 1 |
 | Cloud | Postgres for accounts, projects, versions, collaborators; S3-compatible object storage for samples, stems and renders | 5 |
 | Sync | Per-project version history; last-writer-wins per project at first, then CRDT/OT per channel for realtime collaboration | 5-6 |
@@ -113,7 +113,7 @@ AI features call a model service through the API with per-user rate limits and c
 
 `docs/FRONTEND_ENGINEERING_STANDARD.md` is the default. Where this product differs, it is on purpose:
 
-| Standard default | Forge | Why |
+| Standard default | Pro Studio | Why |
 | --- | --- | --- |
 | Next.js | **Vite + React** | A DAW is a client-only, offline-capable app with no SEO or server rendering need. A marketing site can use Next separately. |
 | Tailwind CSS | **Native CSS in cascade layers, driven by tokens** | Dense custom controls (knobs, faders, meters, docks) are mostly bespoke CSS. Tokens remain the single source of truth. |

@@ -10,9 +10,9 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@forge/shared': fromRoot('packages/shared/src/index.ts'),
-      '@forge/ui/styles': fromRoot('packages/ui/src/styles'),
-      '@forge/ui': fromRoot('packages/ui/src/index.ts'),
+      '@pro-studio/shared': fromRoot('packages/shared/src/index.ts'),
+      '@pro-studio/ui/styles': fromRoot('packages/ui/src/styles'),
+      '@pro-studio/ui': fromRoot('packages/ui/src/index.ts'),
     },
   },
   build: { target: 'es2022', sourcemap: true },

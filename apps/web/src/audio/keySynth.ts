@@ -3,7 +3,7 @@
  * (docs/ARCHITECTURE.md section 3): it takes any BaseAudioContext, so it can also render offline.
  * Presets are data, not code paths.
  */
-import { mtof } from '@forge/shared';
+import { mtof } from '@pro-studio/shared';
 
 export type PresetId = 'keys' | 'pluck' | 'sub808';
 

@@ -17,13 +17,13 @@
     "resolveJsonModule": true,
     "noEmit": true,
     "paths": {
-      "@forge/shared": [
+      "@pro-studio/shared": [
         "./packages/shared/src/index.ts"
       ],
-      "@forge/engine": [
+      "@pro-studio/engine": [
         "./packages/engine/src/index.ts"
       ],
-      "@forge/ui": [
+      "@pro-studio/ui": [
         "./packages/ui/src/index.ts"
       ]
     }

@@ -1,4 +1,4 @@
-/* App-level styles. Everything reads tokens from @forge/ui; no literal colours, sizes or radii. */
+/* App-level styles. Everything reads tokens from @pro-studio/ui; no literal colours, sizes or radii. */
 @layer components {
   .app {
     min-height: 100dvh;

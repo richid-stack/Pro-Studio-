@@ -1,11 +1,11 @@
-import { MODES, MODE_LABELS, MODE_SUMMARIES } from '@forge/shared';
+import { MODES, MODE_LABELS, MODE_SUMMARIES } from '@pro-studio/shared';
 import { Segmented } from './components/Segmented';
 import { KeysPanel } from './features/keys/KeysPanel';
 import { preferences } from './state/preferences';
 import { usePreferences } from './state/usePreferences';
 
 /** Working title. Rename here and in index.html. */
-const APP_NAME = 'Forge';
+const APP_NAME = 'Pro Studio';
 
 export function App() {
   const prefs = usePreferences();

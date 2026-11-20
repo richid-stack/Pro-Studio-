@@ -15,7 +15,7 @@ Every feature below is registered with a mode (`packages/shared/src/modes.ts`). 
 
 | Feature | What it does | Status |
 | --- | --- | --- |
-| **Vibe Starter** | Pick genre, mood and tempo range; get a full loop (drums, 808, chords, melody) with 8 variations. Lock any layer and re-roll the rest. | Genre progressions built in `@forge/shared`; generator planned |
+| **Vibe Starter** | Pick genre, mood and tempo range; get a full loop (drums, 808, chords, melody) with 8 variations. Lock any layer and re-roll the rest. | Genre progressions built in `@pro-studio/shared`; generator planned |
 | **Hum / tap / beatbox to MIDI** | Sing a melody, tap a rhythm or beatbox; it becomes notes or drum hits on the grid. Uses the shipped YIN pitch detector and onset detector. | Detectors built and tested; capture UI planned |
 | **Song-section builder** | Build intro, verse, hook, bridge and drop from one loop, with genre-appropriate lengths and transitions. | Planned |
 | **Learn mode** | Guided lessons that operate the real interface and check what you made. | Planned |

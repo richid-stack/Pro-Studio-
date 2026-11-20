@@ -7,9 +7,9 @@ Each phase has exit criteria. A phase is done when every criterion is demonstrab
 Repo, standards, design tokens, the logic that must be correct before UI is built on it.
 
 - [x] pnpm monorepo, strict TypeScript, ESLint, Prettier, CI workflow
-- [x] `@forge/shared`: theory (13 scales, 13+ chord types, chord detection, genre progressions), typing-keyboard piano state machine, project schema v1. 22 tests.
-- [x] `@forge/engine/analysis`: onset detection, YIN pitch, loop finder. 9 tests.
-- [x] `@forge/ui`: tokens, dark and light themes, density modes, contrast gate (WCAG 2.2 AA, 198 pairs)
+- [x] `@pro-studio/shared`: theory (13 scales, 13+ chord types, chord detection, genre progressions), typing-keyboard piano state machine, project schema v1. 22 tests.
+- [x] `@pro-studio/engine/analysis`: onset detection, YIN pitch, loop finder. 9 tests.
+- [x] `@pro-studio/ui`: tokens, dark and light themes, density modes, contrast gate (WCAG 2.2 AA, 198 pairs)
 - [x] Docs and the frontend standard in the repo
 - [x] `packages/shared`: experience-mode registry (Beginner / Standard / Pro) with tests; typing-keyboard input controller. 52 unit tests in total (41 shared, 9 engine, 2 ui)
 - [x] `apps/web` shell: keyboard piano with sound presets, on-screen keys, mode / theme / density switchers. Verified in Chromium by 13 Playwright tests against an esbuild bundle (sound is measured, not assumed)
@@ -34,7 +34,7 @@ The first milestone you asked for.
 - Channel and mixer inserts: EQ, compressor, saturation, reverb, delay, filter, transient shaper, sidechain.
 - Sampler v2: slicing, key-zones, loop with crossfade, time-stretch and pitch.
 - Export: WAV (16/24-bit), MP3, stems; loudness readout (LUFS, true peak).
-- `.forge` project file.
+- `.prostudio` project file.
 - Exit: offline render of a fixture project matches golden loudness and spectrum; 64 simultaneous voices without dropouts on a mid-range laptop (measured); keyboard-to-sound latency recorded.
 
 ## Phase 3: Arrangement

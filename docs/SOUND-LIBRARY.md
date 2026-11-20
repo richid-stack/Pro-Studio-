@@ -35,7 +35,7 @@ Every shipped sound has an entry in `apps/web/public/sounds/manifest.json` (plan
   "durationMs": 640,
   "license": "own",
   "licenseUrl": null,
-  "author": "Forge",
+  "author": "Pro Studio",
   "attribution": null,
   "sha256": "..."
 }
@@ -47,7 +47,7 @@ A CI check fails the build if a file in `public/sounds` has no manifest entry, a
 
 - Small default kit is bundled for instant first sound; larger libraries stream on demand from object storage and are cached in OPFS.
 - Files are stored losslessly (FLAC) and served as-is; the browser decodes once and the peaks for the waveform preview are computed at import and cached.
-- The browser shows key and BPM for every sound; the values come from the analysis in `@forge/engine` (YIN pitch for one-shots, loop finder for loops) and are stored in the manifest so users do not wait for analysis.
+- The browser shows key and BPM for every sound; the values come from the analysis in `@pro-studio/engine` (YIN pitch for one-shots, loop finder for loops) and are stored in the manifest so users do not wait for analysis.
 
 ## User-imported sounds
 

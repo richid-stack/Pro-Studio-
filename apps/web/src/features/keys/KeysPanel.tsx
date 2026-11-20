@@ -8,7 +8,7 @@ import {
   mtof,
   type KeyLayout,
   type PianoEvent,
-} from '@forge/shared';
+} from '@pro-studio/shared';
 import { keyEngine, type AudioStatus } from '../../audio/engine';
 import { PRESETS, type PresetId } from '../../audio/keySynth';
 import { Segmented } from '../../components/Segmented';

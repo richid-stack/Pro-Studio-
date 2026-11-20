@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { keyLabel, midiName } from '@forge/shared';
+import { keyLabel, midiName } from '@pro-studio/shared';
 
 const WHITE_PCS = new Set([0, 2, 4, 5, 7, 9, 11]);
 

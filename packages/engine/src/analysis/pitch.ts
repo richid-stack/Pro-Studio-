@@ -1,4 +1,4 @@
-import { ftom } from '@forge/shared';
+import { ftom } from '@pro-studio/shared';
 
 export interface PitchResult {
   /** Fractional MIDI note, e.g. 57.02 for a slightly sharp A3. */

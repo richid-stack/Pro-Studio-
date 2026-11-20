@@ -1,6 +1,6 @@
 /**
  * Segmented single-choice control built on native radio inputs, so arrow keys, focus and screen-reader
- * semantics come from the browser. Moves into @forge/ui in Phase 1 when the component library starts.
+ * semantics come from the browser. Moves into @pro-studio/ui in Phase 1 when the component library starts.
  */
 interface Option<T extends string> {
   value: T;
