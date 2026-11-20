@@ -7,6 +7,8 @@ const fromRoot = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.
 // Workspace packages are consumed as source (their package.json `exports` point at src/index.ts),
 // so there is no build step between packages. The aliases mirror tsconfig.base.json `paths`.
 export default defineConfig({
+  // VITE_BASE is set when the app is served from a sub-path (GitHub Pages: /Pro-Studio-/).
+  base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
   resolve: {
     alias: {

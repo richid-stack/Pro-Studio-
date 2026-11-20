@@ -42,7 +42,8 @@ async function openApp(page: Page) {
   page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
   page.on('requestfailed', (r) => problems.push(`requestfailed: ${r.url()}`));
   await tapAudio(page);
-  await page.goto('/');
+  // Relative, so the tests also work when the app is served under a sub-path (see playwright.config.ts).
+  await page.goto('./');
   await page.locator('.piano').waitFor();
 
   const key = (name: string) => page.locator(`.piano button[aria-label="${name}"]`);

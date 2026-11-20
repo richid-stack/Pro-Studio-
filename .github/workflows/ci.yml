@@ -1,35 +1,74 @@
 name: CI
+
 on:
-  push: { branches: [main] }
+  push:
+    branches: [main]
   pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
+    name: Typecheck, lint, tests, repo checks, build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
-      - run: pnpm install --no-frozen-lockfile   # switch to --frozen-lockfile once pnpm-lock.yaml is committed
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
+      - run: pnpm test:scripts
       - run: pnpm contrast
+      - run: pnpm check:deps
+      - run: pnpm check:tokens
+      - run: pnpm check:sounds
       - run: pnpm build
+      - run: pnpm check:budget
 
   e2e:
+    name: e2e (${{ matrix.project }})
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Chromium is required. The other browsers are informational until they have been green
+    # once; then flip `experimental` to false so a regression there fails the build.
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { project: chromium, browser: chromium, experimental: false }
+          - { project: firefox, browser: firefox, experimental: true }
+          - { project: webkit, browser: webkit, experimental: true }
+          - { project: mobile-chrome, browser: chromium, experimental: true }
+          - { project: mobile-safari, browser: webkit, experimental: true }
+    env:
+      E2E_ALL_BROWSERS: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
-      - run: pnpm install --no-frozen-lockfile
-      - run: pnpm --filter @pro-studio/web exec playwright install --with-deps chromium
-      - run: pnpm e2e
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @pro-studio/web exec playwright install --with-deps ${{ matrix.browser }}
+      - run: pnpm --filter @pro-studio/web exec playwright test --project=${{ matrix.project }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
-          path: apps/web/playwright-report
+          name: playwright-report-${{ matrix.project }}
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 14

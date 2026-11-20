@@ -34,6 +34,9 @@ Press `A S D F G H J K` for notes, `W E T Y U` for black keys, `Z` / `X` for oct
 | `pnpm test` | Unit tests (`node:test`) for shared, engine and ui |
 | `pnpm e2e` | Playwright browser tests (needs `pnpm exec playwright install chromium` once) |
 | `pnpm contrast` | WCAG contrast gate for the design tokens, both themes |
+| `pnpm check:deps` / `check:tokens` / `check:sounds` | Architecture rules: dependency direction, tokens-only styling, sound licence manifest |
+| `pnpm check:budget` | Initial JS gzipped under 250 kB (run after `pnpm build`) |
+| `pnpm test:scripts` | Tests for the checks above |
 | `pnpm lint` / `pnpm format` | ESLint and Prettier |
 
 ## Repository layout
@@ -54,6 +57,8 @@ docs/            Architecture, roadmap, design system, sound library, standards
 - [docs/BEYOND-FL.md](docs/BEYOND-FL.md): the producer-assist features
 - [docs/DESIGN-SYSTEM.md](docs/DESIGN-SYSTEM.md): identity, tokens, accessibility rules
 - [docs/SOUND-LIBRARY.md](docs/SOUND-LIBRARY.md): what sounds may ship and how they are tracked
+- [docs/TESTING.md](docs/TESTING.md): test layers, and the device tests only the owner can run
+- [docs/REVIEW-AND-CI.md](docs/REVIEW-AND-CI.md): CI, code reviewers (Codex, CodeRabbit, Qodo, Copilot), GitHub security, phone preview link
 - [docs/FRONTEND_ENGINEERING_STANDARD.md](docs/FRONTEND_ENGINEERING_STANDARD.md): the quality bar for all UI work
 - [CLAUDE.md](CLAUDE.md): instructions for AI coding agents working in this repo
 

@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit reviews pull requests only. The rules themselves live in CLAUDE.md; this file
+# points the bot at the risky parts of the codebase and keeps it quiet elsewhere.
+language: en-US
+early_access: false
+
+reviews:
+  profile: chill
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+
+  path_filters:
+    - "!pnpm-lock.yaml"
+    - "!prototype/**"
+    - "!**/dist/**"
+    - "!**/*.map"
+    - "!**/test-results/**"
+    - "!**/playwright-report/**"
+
+  path_instructions:
+    - path: "packages/engine/**"
+      instructions: |
+        Audio code. Anything that runs per audio block must not allocate, lock, log, use Date,
+        promises or timers, or throw; buffers are preallocated. Flag NaN/Infinity reaching output.
+        New DSP needs an offline-render test that asserts on samples (peak, RMS, frequency, timing).
+        This package may import only @pro-studio/shared.
+    - path: "packages/shared/**"
+      instructions: |
+        Pure TypeScript, no DOM, imports nothing. Project schema changes must bump
+        PROJECT_SCHEMA_VERSION and add a migration plus a fixture of the old format.
+        New features must be registered in modes.ts.
+    - path: "packages/ui/**"
+      instructions: |
+        Tokens and themes. A new meaningful colour needs a token and a contrast pair in both themes
+        (scripts/check-contrast.mjs). No imports from apps.
+    - path: "apps/web/**"
+      instructions: |
+        React UI. No hex colours, raw px sizes or radii: use tokens only. Timing-critical work must
+        stay off the React render path. Every control must work (no dead buttons). Icon-only controls
+        need an accessible name. Typing in a text field must not trigger the piano or shortcuts.
+        Gate features with isFeatureVisible from the mode registry.
+    - path: "apps/api/**"
+      instructions: |
+        Authorization is enforced server-side and every query is scoped to the owner. Validate input at
+        the boundary. No secrets in code or logs. Tokens are stored hashed. Flag missing 401/404 tests.
+    - path: "**/sounds/**"
+      instructions: |
+        Every sound needs a manifest entry with a licence; CC-BY needs attribution. Reject anything
+        without a licence you can show.
+    - path: ".github/**"
+      instructions: |
+        Workflows use least-privilege permissions and pinned action versions. No secrets echoed to logs.
+
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+
+  tools:
+    eslint:
+      enabled: true
+    actionlint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    shellcheck:
+      enabled: true
+
+chat:
+  auto_reply: true

@@ -1,0 +1,46 @@
+name: Bug report
+description: Something sounds wrong, stops, or does not work. Device details help most.
+labels: [bug]
+body:
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect, and what happened instead?
+      description: For sound problems, say what you heard (silence, crackle, stutter, wrong note, late) and when it started.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The shortest list that makes it happen. Include which keys or buttons you pressed.
+    validations:
+      required: true
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device
+      options: [Windows laptop or PC, Mac, iPhone or iPad, Android phone or tablet, Chromebook, Other]
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: "e.g. Safari 18 on iOS 18, Chrome 131 on Android 15"
+    validations:
+      required: true
+  - type: dropdown
+    id: output
+    attributes:
+      label: Audio output
+      options: [Built-in speakers, Wired headphones, Bluetooth headphones or speaker, USB audio interface, Other, Not sure]
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options: [Beginner, Standard, Pro]
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else (screenshots, console errors, battery saver on, silent switch on)

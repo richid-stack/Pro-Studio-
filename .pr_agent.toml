@@ -1,0 +1,24 @@
+# Qodo Merge (PR-Agent) repo settings. The file must be on the default branch to take effect.
+# Rules live in CLAUDE.md; this only steers the reviewer.
+
+[config]
+ignore_pr_title = ["\\[Bump\\]", "^chore\\(deps\\)"]
+
+[ignore]
+glob = ['pnpm-lock.yaml', 'prototype/**', '**/dist/**', '**/*.map']
+
+[pr_reviewer]
+require_tests_review = true
+extra_instructions = """\
+Review against CLAUDE.md. Highest priority:
+- Audio code (packages/engine): per-block code must not allocate, lock, log, use Date/promises/timers, or throw; NaN/Infinity must not reach the output; new DSP needs an offline-render test.
+- Timing-critical work on a React render path (audio must never wait for the UI).
+- Hex colours or raw px/radius values outside design tokens.
+- Features not registered in packages/shared/src/modes.ts, or per-mode component forks.
+- Controls that do nothing (no fake controls).
+- Typing in a text field triggering the piano or a shortcut; icon-only controls without accessible names.
+- Sounds without a manifest entry and a licence.
+- Dependency direction: shared imports nothing; engine imports only shared; nothing imports prototype/.
+- apps/api: authorization on the server, queries scoped to the owner, input validated at the boundary, no secrets in code or logs.
+Skip formatting (Prettier) and the lockfile.
+"""

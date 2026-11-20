@@ -1,0 +1,15 @@
+{
+  "name": "Pro Studio",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "postCreateCommand": "corepack enable && pnpm install --frozen-lockfile && pnpm --filter @pro-studio/web exec playwright install --with-deps chromium",
+  "forwardPorts": [5173, 4173],
+  "portsAttributes": {
+    "5173": { "label": "Pro Studio (dev)", "onAutoForward": "openBrowser" },
+    "4173": { "label": "Pro Studio (preview build)" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode", "ms-playwright.playwright"]
+    }
+  }
+}

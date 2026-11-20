@@ -9,7 +9,7 @@ export default tseslint.config(
     // Node scripts and config files run in Node, not the browser.
     files: ['**/*.mjs', '**/*.config.js'],
     languageOptions: {
-      globals: { console: 'readonly', process: 'readonly' },
+      globals: { console: 'readonly', process: 'readonly', URL: 'readonly' },
     },
   },
   {
