@@ -1,0 +1,85 @@
+<header class="top panel" id="top">
+  <div class="brand">FORGE <small>beat studio</small></div>
+  <div class="tk">
+    <button class="tbtn play" id="btnPlay" aria-pressed="false" aria-label="Play or pause (Space)" title="Play / Stop (Space)">
+      <svg viewBox="0 0 16 16" id="icoPlay"><path d="M3 1.5v13l11-6.5z"/></svg>
+      <svg viewBox="0 0 16 16" id="icoStop" hidden><rect x="2.5" y="2.5" width="11" height="11" rx="1"/></svg>
+    </button>
+    <div class="readout" id="readout" aria-live="off">001<small>.</small>1<small>.</small>1</div>
+  </div>
+  <label class="fld"><span>Tempo</span><input type="number" id="bpm" min="60" max="200" step="1" value="140"></label>
+  <div class="tk">
+    <div class="fld"><span>Swing</span><div class="knob" id="kSwing"></div></div>
+    <div class="fld"><span>Human</span><div class="knob" id="kHuman"></div></div>
+  </div>
+  <label class="fld"><span>Style</span>
+    <select id="genre"><option value="trap">Trap</option><option value="drill">Drill</option><option value="rnb">R&amp;B</option><option value="afro">Afrobeat</option></select></label>
+  <label class="fld"><span>Key</span><select id="key"></select></label>
+  <label class="fld"><span>Scale</span><select id="scale"></select></label>
+  <div class="fld"><span>Scale lock</span><button class="chk" id="lock" aria-pressed="true">Snap notes</button></div>
+  <div class="fld"><span>Audio</span><button class="chk" id="lite" aria-pressed="false" title="Lighter reverb and fewer voices, for phones">Lite</button></div>
+  <label class="fld"><span>Length</span><select id="bars"><option value="1">1 bar</option><option value="2">2 bars</option><option value="4">4 bars</option></select></label>
+  <div class="master-viz">
+    <button class="tb" id="btnUndo" title="Undo (Ctrl+Z)">Undo</button>
+    <canvas id="spec" width="300" height="72" aria-label="Master spectrum"></canvas>
+    <div class="mm"><div class="meter" id="mmL"><i></i><b></b></div><div class="meter" id="mmR"><i></i><b></b></div></div>
+  </div>
+</header>
+
+<main class="work">
+  <section class="panel" aria-label="Channel rack">
+    <div class="ph">
+      <h2>Channel rack</h2>
+      <div class="seg" role="group" aria-label="Step tool">
+        <button id="toolDraw" aria-pressed="true">Draw</button><button id="toolRoll" aria-pressed="false" title="Click a step to cycle the roll: ×2 ×3 ×4 ×6 ×8">Roll</button>
+      </div>
+      <label class="kn"><span>Roll shape</span>
+        <select class="sel" id="rollShape"><option value="flat">Flat</option><option value="up">Build up</option><option value="down">Fade out</option></select></label>
+      <div class="sp"></div>
+      <span class="hint">Click steps · right-click cycles a hi-hat roll</span>
+    </div>
+    <div class="rack-body">
+      <div class="names" id="names"></div>
+      <div class="steps" id="steps"><div class="steps-in" id="stepsIn"></div></div>
+    </div>
+    <div class="lane" id="laneBox">
+      <div class="lane-l"><b id="laneName">Velocity</b><span>Drag bars to shape the groove. Steps with a number are rolls.</span></div>
+      <div class="lane-r" id="laneR"><canvas id="vlane"></canvas></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="Piano roll">
+    <div class="ph">
+      <h2>Piano roll</h2>
+      <span class="chip" id="rollChip"><i></i><span></span></span>
+      <label class="kn"><span>Grid</span>
+        <select class="sel" id="snap">
+          <option value="4">1/4</option><option value="2">1/8</option><option value="1" selected>1/16</option><option value="0.5">1/32</option>
+          <option value="1.3333333333">1/8 triplet</option><option value="0.6666666667">1/16 triplet</option></select></label>
+      <button class="tb" id="btnSlide" aria-pressed="false" title="Glide the selected note from the one before it (S)">Slide</button>
+      <button class="tb" id="btnQuant" title="Snap every note to the grid (Q)">Quantize</button>
+      <button class="tb" id="btnGhost" aria-pressed="true" title="Show the other instruments faintly">Ghost</button>
+      <button class="tb" id="btnClear">Clear</button>
+      <div class="sp"></div>
+      <div class="kn" id="k808" hidden>
+        <span>Decay</span><div class="knob sm" id="kDecay"></div>
+        <span>Glide</span><div class="knob sm" id="kGlide"></div>
+        <span>Drive</span><div class="knob sm" id="kDrive"></div>
+      </div>
+    </div>
+    <div class="roll-wrap">
+      <div id="rollScroll"><div class="roll-in" id="rollIn"><canvas id="keysCv"></canvas><canvas id="gridCv"></canvas><div id="rphead"></div></div></div>
+    </div>
+    <div class="rl"><div class="rl-k">Velocity</div><div class="rl-s" id="rlS"><canvas id="rlane"></canvas></div></div>
+  </section>
+</main>
+
+<section class="panel" id="bottom" aria-label="Mixer and sampler">
+  <div class="ph ptabs" role="tablist">
+    <button class="t" id="tabMixer" role="tab" aria-selected="true" aria-controls="mixer">Mixer</button>
+    <button class="t" id="tabSampler" role="tab" aria-selected="false" aria-controls="sampler">Sampler</button>
+  </div>
+  <div class="mixer" id="mixer" role="tabpanel" aria-label="Mixer"></div>
+  <div class="smp" id="sampler" role="tabpanel" aria-label="Sampler" hidden></div>
+</section>
+<div class="start-note" id="startNote">Press Play (or Space) to start the audio engine</div>

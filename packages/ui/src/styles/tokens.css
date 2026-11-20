@@ -1,0 +1,263 @@
+/*
+ * Design tokens: the single source of truth for colour, type, space, shape, motion and layering.
+ * Identity: "Graphite & Amber". Cool graphite surfaces so colour is reserved for meaning (channels, meters,
+ * playhead), one amber accent, and no gradients or glows unless they communicate state.
+ *
+ * Three tiers: primitives (raw values) -> semantic (what it means) -> component (how a part uses it, in the
+ * component's own stylesheet). Never use a primitive or a hex value in a component.
+ * Every colour pair that carries text or essential graphics is checked by `pnpm contrast`.
+ */
+
+/* ---------------------------------------------------------------- primitives */
+:root {
+  --gray-1000: #07090c;
+  --gray-950: #0b0d12;
+  --gray-900: #10131a;
+  --gray-850: #151922;
+  --gray-800: #1b202a;
+  --gray-750: #222834;
+  --gray-700: #2b3240;
+  --gray-600: #3a4254;
+  --gray-500: #6a7488;
+  --gray-400: #8d96aa;
+  --gray-300: #aeb6c7;
+  --gray-200: #cfd4e0;
+  --gray-100: #e7eaf1;
+  --gray-50: #f4f6fa;
+  --gray-0: #ffffff;
+
+  --amber-300: #ffc66b;
+  --amber-400: #ffae3d;
+  --amber-500: #e8962a;
+  --amber-700: #9a5200;
+  --amber-800: #7d4200;
+  --amber-ink: #1a1100;
+
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* type scale: dense tool defaults; roles are defined in base.css */
+  --text-xs: 0.6875rem;   /* 11px  fine print, shortcut hints */
+  --text-sm: 0.75rem;     /* 12px  labels */
+  --text-base: 0.8125rem; /* 13px  default UI text */
+  --text-md: 0.875rem;    /* 14px  body, inputs */
+  --text-lg: 1rem;        /* 16px  component headings */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 2rem;       /* 32px */
+  --leading-tight: 1.25;
+  --leading-normal: 1.45;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --tracking-label: 0.04em;
+  --tracking-display: -0.01em;
+
+  /* space: 4px base */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* shape */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-pill: 999px;
+  --border-width: 1px;
+
+  /* motion */
+  --duration-instant: 80ms;
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 260ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* layering */
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-dock: 20;
+  --z-popover: 40;
+  --z-modal: 60;
+  --z-toast: 80;
+  --z-tooltip: 100;
+
+  /* breakpoints (reference values; media queries cannot read custom properties) */
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1536px;
+
+  /* layout, compact density (default: this is a dense tool) */
+  --topbar-h: 48px;
+  --control-h-sm: 24px;
+  --control-h: 28px;
+  --control-h-lg: 32px;
+  --row-h: 30px;
+  --panel-header-h: 32px;
+  --browser-w: 260px;
+  --hit-target: 24px;
+}
+
+/* ------------------------------------------------------------------ density */
+:root[data-density='comfortable'] {
+  --topbar-h: 56px;
+  --control-h-sm: 32px;
+  --control-h: 40px;
+  --control-h-lg: 44px;
+  --row-h: 40px;
+  --panel-header-h: 40px;
+  --hit-target: 44px;
+}
+
+/* --------------------------------------------------- semantic colours: dark */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: var(--gray-950);
+  --surface-inset: var(--gray-1000);
+  --surface-1: var(--gray-900);
+  --surface-2: var(--gray-850);
+  --surface-3: var(--gray-800);
+  --surface-4: var(--gray-750);
+
+  --border-subtle: var(--gray-750);
+  --border-strong: var(--gray-600);
+  --border-control: var(--gray-500);
+
+  --text-primary: var(--gray-100);
+  --text-secondary: var(--gray-300);
+  --text-muted: var(--gray-400);
+  --text-disabled: var(--gray-500);
+
+  --accent: var(--amber-400);
+  --accent-hover: var(--amber-300);
+  --accent-pressed: var(--amber-500);
+  --accent-contrast: var(--amber-ink);
+  --accent-subtle: #3b2a0f;
+  --focus-ring: var(--gray-50);
+
+  --success: #5ce0aa;
+  --warning: #ffd23f;
+  --danger: #ff7a66;
+  --danger-fill: #c8362a;
+  --danger-contrast: var(--gray-0);
+
+  --meter-ok: #5ce0aa;
+  --meter-warn: #ffd23f;
+  --meter-clip: #ff5a4a;
+
+  --playhead: var(--amber-400);
+  --selection-fill: rgb(255 174 61 / 0.22);
+  --grid-bar: rgb(255 255 255 / 0.16);
+  --grid-beat: rgb(255 255 255 / 0.09);
+  --grid-step: rgb(255 255 255 / 0.04);
+  --row-black-key: rgb(0 0 0 / 0.28);
+
+  /* on-screen piano */
+  --key-white: var(--gray-100);
+  --key-white-text: var(--gray-700);
+  --key-black: var(--gray-1000);
+  --key-black-text: var(--gray-200);
+
+  /* channel colours: each is checked at 3:1 against surfaces, and carries dark text at 4.5:1 */
+  --ch-1: #ff7a66;
+  --ch-2: #ffb23f;
+  --ch-3: #ffd84d;
+  --ch-4: #b9e35a;
+  --ch-5: #5ce0aa;
+  --ch-6: #3fd0d0;
+  --ch-7: #58c8ff;
+  --ch-8: #7fa8ff;
+  --ch-9: #c58cff;
+  --ch-10: #ff8fc4;
+  --ch-11: #f08a5d;
+  --ch-12: #a9b4cc;
+  --text-on-channel: #11141a;
+
+  --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.06);
+  --shadow-modal: 0 24px 64px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.08);
+  --shadow-control: 0 1px 2px rgb(0 0 0 / 0.4);
+  --scrim: rgb(5 7 10 / 0.6);
+}
+
+/* -------------------------------------------------- semantic colours: light */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: var(--gray-100);
+  --surface-inset: var(--gray-50);
+  --surface-1: var(--gray-0);
+  --surface-2: var(--gray-50);
+  --surface-3: #eceff5;
+  --surface-4: #dfe4ed;
+
+  --border-subtle: #dde1ea;
+  --border-strong: #b9c0cf;
+  --border-control: #6a7488;
+
+  --text-primary: var(--gray-950);
+  --text-secondary: var(--gray-700);
+  --text-muted: #566075;
+  --text-disabled: #8d96aa;
+
+  --accent: var(--amber-700);
+  --accent-hover: var(--amber-800);
+  --accent-pressed: #663500;
+  --accent-contrast: var(--gray-0);
+  --accent-subtle: #fbe7c8;
+  --focus-ring: var(--gray-950);
+
+  --success: #0b7a52;
+  --warning: #8a6500;
+  --danger: #b3261b;
+  --danger-fill: #b3261b;
+  --danger-contrast: var(--gray-0);
+
+  --meter-ok: #0b9a69;
+  --meter-warn: #a07200;
+  --meter-clip: #d6301f;
+
+  --playhead: var(--amber-700);
+  --selection-fill: rgb(154 82 0 / 0.16);
+  --grid-bar: rgb(0 0 0 / 0.22);
+  --grid-beat: rgb(0 0 0 / 0.12);
+  --grid-step: rgb(0 0 0 / 0.05);
+  --row-black-key: rgb(0 0 0 / 0.06);
+
+  --key-white: var(--gray-0);
+  --key-white-text: var(--gray-700);
+  --key-black: var(--gray-900);
+  --key-black-text: var(--gray-200);
+
+  --ch-1: #d03a26;
+  --ch-2: #a85f00;
+  --ch-3: #7c6500;
+  --ch-4: #517c0e;
+  --ch-5: #0a7d57;
+  --ch-6: #077a7a;
+  --ch-7: #0a6fa8;
+  --ch-8: #3558c9;
+  --ch-9: #7d3fc9;
+  --ch-10: #b82c76;
+  --ch-11: #b0481f;
+  --ch-12: #4f5b78;
+  --text-on-channel: #ffffff;
+
+  --shadow-popover: 0 8px 24px rgb(15 20 35 / 0.16), 0 0 0 1px rgb(15 20 35 / 0.08);
+  --shadow-modal: 0 24px 64px rgb(15 20 35 / 0.28), 0 0 0 1px rgb(15 20 35 / 0.1);
+  --shadow-control: 0 1px 2px rgb(15 20 35 / 0.12);
+  --scrim: rgb(15 20 35 / 0.45);
+}

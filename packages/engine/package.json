@@ -1,0 +1,12 @@
+{
+  "name": "@forge/engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "@forge/shared": "workspace:*" },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "tsx --test \"test/*.test.ts\""
+  }
+}
