@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { FADER_MIN_DB, dbToFader, faderToDb, formatDb, formatPan, meterPosition, stepValue, valueFromDrag } from '../src/index';
+import { FADER_MIN_DB, gridMove, dbToFader, faderToDb, formatDb, formatPan, meterPosition, stepValue, valueFromDrag } from '../src/index';
 
 describe('drag maths', () => {
   const r = { min: 0, max: 1 };
@@ -60,5 +60,22 @@ describe('readouts', () => {
     assert.equal(meterPosition(1), 1);
     assert.ok(Math.abs(meterPosition(0.5) - (60 - 6.0206) / 60) < 1e-3);
     assert.equal(meterPosition(4), 1);
+  });
+});
+
+describe('gridMove', () => {
+  it('moves one cell and stops at the edges', () => {
+    assert.deepEqual(gridMove(1, 1, 'ArrowRight', 3, 16), { row: 1, col: 2 });
+    assert.deepEqual(gridMove(0, 0, 'ArrowLeft', 3, 16), { row: 0, col: 0 });
+    assert.deepEqual(gridMove(2, 15, 'ArrowRight', 3, 16), { row: 2, col: 15 });
+    assert.deepEqual(gridMove(0, 4, 'ArrowUp', 3, 16), { row: 0, col: 4 });
+    assert.deepEqual(gridMove(2, 4, 'ArrowDown', 3, 16), { row: 2, col: 4 });
+    assert.deepEqual(gridMove(1, 7, 'Home', 3, 16), { row: 1, col: 0 });
+    assert.deepEqual(gridMove(1, 7, 'End', 3, 16), { row: 1, col: 15 });
+  });
+
+  it('ignores other keys and survives an empty grid', () => {
+    assert.equal(gridMove(0, 0, 'a', 3, 16), null);
+    assert.deepEqual(gridMove(5, 99, 'ArrowDown', 0, 0), { row: 0, col: 0 });
   });
 });

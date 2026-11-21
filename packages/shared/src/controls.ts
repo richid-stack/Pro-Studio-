@@ -61,3 +61,28 @@ export function meterPosition(linearPeak: number): number {
   if (linearPeak <= 0.001) return 0;
   return clamp((20 * Math.log10(linearPeak) + 60) / 60, 0, 1);
 }
+
+export type GridKey = 'ArrowLeft' | 'ArrowRight' | 'ArrowUp' | 'ArrowDown' | 'Home' | 'End';
+
+/** Where focus goes in a rows-by-columns grid of buttons (the step grid) for an arrow key. Stays inside the grid. */
+export function gridMove(row: number, col: number, key: string, rows: number, cols: number): { row: number; col: number } | null {
+  if (rows <= 0 || cols <= 0) return { row: 0, col: 0 };
+  const r = clamp(row, 0, Math.max(0, rows - 1));
+  const c = clamp(col, 0, Math.max(0, cols - 1));
+  switch (key) {
+    case 'ArrowLeft':
+      return { row: r, col: Math.max(0, c - 1) };
+    case 'ArrowRight':
+      return { row: r, col: Math.min(cols - 1, c + 1) };
+    case 'ArrowUp':
+      return { row: Math.max(0, r - 1), col: c };
+    case 'ArrowDown':
+      return { row: Math.min(rows - 1, r + 1), col: c };
+    case 'Home':
+      return { row: r, col: 0 };
+    case 'End':
+      return { row: r, col: cols - 1 };
+    default:
+      return null;
+  }
+}

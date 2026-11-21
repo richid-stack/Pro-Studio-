@@ -20,10 +20,12 @@ test('every mode has a label, a summary and defaults', () => {
   }
 });
 
-test('beginner gets guidance and the starters, not the technical tools', () => {
+test('beginner gets guidance, the starters and the core workshop, not the technical depth', () => {
   const v = ids('beginner');
   for (const id of ['coach-marks', 'guided-builder', 'plain-language', 'vibe-starter', 'keyboard-piano', 'sound-browser']) assert.ok(v.has(id), id);
-  for (const id of ['piano-roll', 'mixer', 'mixer-routing', 'per-note-properties', 'automation-editor']) assert.ok(!v.has(id), id);
+  // a beginner must be able to make a beat: the step grid, the roll and a simple mixer are always there
+  for (const id of ['channel-rack', 'piano-roll', 'mixer', 'project-files', 'export-wav']) assert.ok(v.has(id), id);
+  for (const id of ['playlist', 'step-editor', 'velocity-lane', 'mixer-sends', 'mixer-routing', 'per-note-properties', 'automation-editor']) assert.ok(!v.has(id), id);
 });
 
 test('standard has the full workspace and drops beginner-only scaffolding', () => {

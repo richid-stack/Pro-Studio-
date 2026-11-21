@@ -73,11 +73,20 @@ export const FEATURES: readonly FeatureDef[] = [
   { id: 'vibe-starter', label: 'Vibe Starter', kind: 'tool' },
   { id: 'mix-health-check', label: 'Mix health check', kind: 'tool' },
 
+  // The core workshop is open to everyone: a beginner who cannot see the step grid cannot make a beat.
+  // Beginner differs by guidance and by what each panel shows, not by hiding the panels.
+  { id: 'channel-rack', label: 'Channel rack', kind: 'tool' },
+  { id: 'piano-roll', label: 'Piano roll', kind: 'tool' },
+  { id: 'mixer', label: 'Mixer', kind: 'tool' },
+  { id: 'project-files', label: 'New, open, save and starter beats', kind: 'tool' },
+  { id: 'export-wav', label: 'Export to WAV', kind: 'tool' },
+  { id: 'roll-scale-rows', label: 'Key and scale shown in the piano roll', kind: 'tool' },
+
   // Standard: the full workspace.
-  { id: 'channel-rack', label: 'Channel rack', kind: 'tool', from: 'standard' },
-  { id: 'piano-roll', label: 'Piano roll', kind: 'tool', from: 'standard' },
   { id: 'playlist', label: 'Playlist', kind: 'tool', from: 'standard' },
-  { id: 'mixer', label: 'Mixer', kind: 'tool', from: 'standard' },
+  { id: 'step-editor', label: 'Per-step velocity, ratchet and roll shape', kind: 'tool', from: 'standard' },
+  { id: 'velocity-lane', label: 'Velocity lane under the piano roll', kind: 'tool', from: 'standard' },
+  { id: 'mixer-sends', label: 'Reverb, delay and duck sends on the mixer', kind: 'tool', from: 'standard' },
   { id: 'chord-brain', label: 'Chord brain', kind: 'tool', from: 'standard' },
   { id: 'hihat-designer', label: 'Hi-hat designer', kind: 'tool', from: 'standard' },
   { id: 'dock-layouts', label: 'Dockable, maximizable panels', kind: 'tool', from: 'standard' },

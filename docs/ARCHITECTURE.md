@@ -79,7 +79,7 @@ One engine and one project format, three levels of interface. Implemented as a r
 
 | Mode | For | What changes |
 | --- | --- | --- |
-| **Beginner** | Never made a beat | Guided beat builder, Vibe Starter up front, coach marks, plain-language labels, "explain why" on every suggestion, safety rails on (scale snap, loudness guard, confirm before destructive actions), comfortable density. Full editor is one click away ("Open in the full studio"). |
+| **Beginner** | Never made a beat | The core workshop is always there (channel rack, piano roll, a simple mixer, starter beats, export) because a beginner who cannot see the step grid cannot make a beat. On top of it: coach marks, plain-language labels, "explain why" on every suggestion, safety rails on (scale snap, loudness guard, confirm before destructive actions), comfortable density. Per-step velocity and ratchets, the velocity lane, sends and the playlist reveal from Standard. The guided beat builder and Vibe Starter will sit on top when built; until then the rack is the way in. |
 | **Standard** | Everyone | The full workspace: channel rack, piano roll, playlist, mixer, sound browser, docking and maximize. Assist tools on demand. Compact density. |
 | **Pro** | Producers and engineers | Everything in Standard plus per-note properties, arbitrary routing and sidechain matrix, automation curves, tempo map, spectrum/phase/loudness analysis, MIDI CC, custom shortcuts and macros, numeric readouts. Safety rails off by default. |
 

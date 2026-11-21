@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 import {
   addDrumChannel, addInstrumentChannel, addNote, addNotes, clearChannel, createStarterProject, deleteNotes, duplicateNotes,
   findChannel, moveChannel, moveNotes, quantizeNotes, removeChannel, renameChannel, resizeNotes, setBars, setBpm, setMix,
-  setNoteSlide, setNoteVelocity, setRatchet, setStepVelocity, setSwing, toggleStep, totalSteps, MAX_NOTE, MIN_NOTE,
+  setKey, setScale, setNoteSlide, setNoteVelocity, setRatchet, setStepVelocity, setSwing, toggleStep, totalSteps, MAX_NOTE, MIN_NOTE,
   type DrumChannel, type InstrumentChannel, type Project,
 } from '../src/index';
 
@@ -174,5 +174,16 @@ describe('project and channels', () => {
     const moved = moveChannel(p, c.id, 0);
     assert.equal(moved.channels[0]?.id, c.id);
     assert.equal(removeChannel(moved, c.id).channels.length, p.channels.length - 1);
+  });
+});
+
+describe('key and scale', () => {
+  it('wraps the key into 0..11 and returns the same project when nothing changes', () => {
+    const p = base();
+    assert.equal(setKey(p, p.key), p);
+    assert.equal(setKey(p, 14).key, 2);
+    assert.equal(setKey(p, -1).key, 11);
+    assert.equal(setScale(p, p.scale), p);
+    assert.equal(setScale(p, 'major').scale, 'major');
   });
 });

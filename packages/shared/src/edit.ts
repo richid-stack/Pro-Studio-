@@ -4,7 +4,7 @@
  * (a velocity of 5, a note below 0) instead of throwing, because the caller is usually a pointer drag.
  */
 import { MAX_BARS, STEPS_PER_BAR, type Channel, type DrumChannel, type DrumName, type InstrumentChannel, type InstrumentName, type MixSettings, type Note, type Project } from './project';
-import { clamp } from './theory';
+import { clamp, type ScaleId } from './theory';
 
 export const MIN_BPM = 40;
 export const MAX_BPM = 240;
@@ -42,6 +42,15 @@ export function setBpm(p: Project, bpm: number): Project {
 
 export function setSwing(p: Project, swing: number): Project {
   return { ...p, swing: clamp(swing, 0, 1) };
+}
+
+export function setKey(p: Project, key: number): Project {
+  const pc = ((Math.round(key) % 12) + 12) % 12;
+  return pc === p.key ? p : { ...p, key: pc };
+}
+
+export function setScale(p: Project, scale: ScaleId): Project {
+  return scale === p.scale ? p : { ...p, scale };
 }
 
 export function setMasterDb(p: Project, db: number): Project {

@@ -6,6 +6,7 @@ export * from './engine';
 export * from './fx/effects';
 export * from './host';
 export * from './protocol';
+export * from './render/loop';
 export * from './render/offline';
 export * from './render/wav';
 export * from './sequencer';

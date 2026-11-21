@@ -11,3 +11,5 @@ export * from './controls';
 export * from './pianoroll';
 export * from './workspace';
 export * from './validate';
+export * from './rollGesture';
+export * from './rollKeys';
