@@ -4,3 +4,6 @@ export * from './keyboard-input';
 export * from './modes';
 export * from './project';
 export * from './rhythm';
+export * from './edit';
+export * from './history';
+export * from './starter';
