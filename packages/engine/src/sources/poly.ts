@@ -1,5 +1,6 @@
 import { mtof } from '@pro-studio/shared';
-import { Adsr, Biquad, oscSample, sinTurns, type Wave } from '../dsp/primitives';
+import { Adsr, Biquad, oscSampleId, sinTurns, WAVE_ID } from '../dsp/primitives';
+import type { Wave } from '../dsp/primitives';
 import { type Source, velocityGain } from './source';
 
 export interface OscSpec {
@@ -87,18 +88,19 @@ class PolyVoice {
   private gain = 0;
   private baseHz = 0;
   private tremPhase = 0;
+  private tremGain = 1;
   /** Samples until the next control-rate filter update; counted per voice so output never depends on block size. */
   private ctl = 0;
   private readonly detuneRatios: number[];
   /** Per-oscillator phase increments for the current note, set once at note start. */
   private readonly dts: Float64Array;
-  private readonly waves: Wave[];
+  private readonly waves: Int8Array;
   private readonly oscGains: Float64Array;
 
   constructor(private readonly sr: number, private preset: PolyPreset) {
     this.detuneRatios = preset.oscs.map((o) => 2 ** (o.detune / 1200));
     this.dts = new Float64Array(preset.oscs.length);
-    this.waves = preset.oscs.map((o) => o.wave);
+    this.waves = Int8Array.from(preset.oscs.map((o) => WAVE_ID[o.wave as Wave]));
     this.oscGains = Float64Array.from(preset.oscs.map((o) => o.gain));
     this.amp = new Adsr(sr);
     this.fenv = new Adsr(sr);
@@ -127,6 +129,7 @@ class PolyVoice {
     this.filter.reset();
     this.phases.fill(0);
     this.tremPhase = 0;
+    this.tremGain = 1;
     this.ctl = 0;
   }
 
@@ -147,6 +150,11 @@ class PolyVoice {
         const key = 2 ** (((this.note - 60) / 12) * p.filter.keytrack);
         const cutoff = p.filter.cutoff * key * 2 ** (p.filter.envAmount * this.fenv.value);
         this.filter.tune(cutoff, p.filter.q);
+        if (p.tremolo) {
+          // a 5 Hz wobble only needs updating every ~0.7 ms
+          this.tremPhase += (p.tremolo.rate * CONTROL_RATE) / this.sr;
+          this.tremGain = 1 - p.tremolo.depth * 0.5 * (1 + sinTurns(this.tremPhase));
+        }
       }
       if (hasFilterEnv) this.fenv.next();
       let s = 0;
@@ -155,13 +163,9 @@ class PolyVoice {
         let ph = (this.phases[k] as number) + dt;
         if (ph >= 1) ph -= 1;
         this.phases[k] = ph;
-        s += oscSample(this.waves[k] as Wave, ph, dt) * (this.oscGains[k] as number);
+        s += oscSampleId(this.waves[k] as number, ph, dt) * (this.oscGains[k] as number);
       }
-      let a = this.amp.next();
-      if (p.tremolo) {
-        this.tremPhase += p.tremolo.rate / this.sr;
-        a *= 1 - p.tremolo.depth * 0.5 * (1 + sinTurns(this.tremPhase));
-      }
+      const a = this.amp.next() * this.tremGain;
       out[i] = (out[i] as number) + this.filter.process(s) * a * this.gain;
       if (this.amp.done) break;
     }

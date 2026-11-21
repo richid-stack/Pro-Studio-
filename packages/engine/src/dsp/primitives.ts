@@ -270,38 +270,47 @@ export function polyBlep(t: number, dt: number): number {
   return 0;
 }
 
-const TABLE_BITS = 12;
-const TABLE_SIZE = 1 << TABLE_BITS;
-const SIN_TABLE = new Float32Array(TABLE_SIZE + 1);
-for (let i = 0; i <= TABLE_SIZE; i++) SIN_TABLE[i] = Math.sin((2 * Math.PI * i) / TABLE_SIZE);
+// sin(2*pi*x) as an odd polynomial on [-1/4, 1/4], Horner form; error below 1e-7
+const TWO_PI = 2 * Math.PI;
+const S1 = TWO_PI;
+const S3 = -(TWO_PI ** 3) / 6;
+const S5 = TWO_PI ** 5 / 120;
+const S7 = -(TWO_PI ** 7) / 5040;
+const S9 = TWO_PI ** 9 / 362880;
+const S11 = -(TWO_PI ** 11) / 39916800;
 
 /**
- * Sine of a phase in turns (1 = a full cycle), by table lookup with linear interpolation: error under 2e-7,
- * several times faster than Math.sin, which matters when dozens of voices each run several sines per sample.
+ * Sine of a phase in turns (1 = a full cycle): fold into a quarter cycle, then a short polynomial. Accurate to
+ * about 1e-7 (below any audible artefact) and cheaper than Math.sin when dozens of voices run several per sample.
  */
 export function sinTurns(phase: number): number {
-  const x = (phase - Math.floor(phase)) * TABLE_SIZE;
-  const i = x | 0;
-  const a = SIN_TABLE[i] as number;
-  return a + ((SIN_TABLE[i + 1] as number) - a) * (x - i);
+  let x = phase - Math.floor(phase);
+  if (x > 0.5) x -= 1;
+  if (x > 0.25) x = 0.5 - x;
+  else if (x < -0.25) x = -0.5 - x;
+  const x2 = x * x;
+  return x * (S1 + x2 * (S3 + x2 * (S5 + x2 * (S7 + x2 * (S9 + x2 * S11)))));
 }
 
 export type Wave = 'sine' | 'saw' | 'square' | 'triangle';
 
-/** One band-limited oscillator sample. Phase advances elsewhere; `dt` is frequency / sampleRate. */
-export function oscSample(wave: Wave, phase: number, dt: number): number {
-  switch (wave) {
-    case 'sine':
-      return sinTurns(phase);
-    case 'saw':
-      return 2 * phase - 1 - polyBlep(phase, dt);
-    case 'square': {
-      const naive = phase < 0.5 ? 1 : -1;
-      return naive + polyBlep(phase, dt) - polyBlep((phase + 0.5) % 1, dt);
-    }
-    case 'triangle':
-      return 1 - 4 * Math.abs(phase - 0.5);
+/** Numeric waveform ids for the per-sample path (comparing strings per sample is measurably slow). */
+export const WAVE_ID: Record<Wave, number> = { sine: 0, saw: 1, square: 2, triangle: 3 };
+
+/** One band-limited oscillator sample by numeric id. Phase advances elsewhere; `dt` is frequency / sampleRate. */
+export function oscSampleId(id: number, phase: number, dt: number): number {
+  if (id === 1) return 2 * phase - 1 - polyBlep(phase, dt);
+  if (id === 0) return sinTurns(phase);
+  if (id === 2) {
+    const other = phase + 0.5;
+    return (phase < 0.5 ? 1 : -1) + polyBlep(phase, dt) - polyBlep(other >= 1 ? other - 1 : other, dt);
   }
+  return 1 - 4 * Math.abs(phase - 0.5);
+}
+
+/** Same by name, for tests and offline rendering. */
+export function oscSample(wave: Wave, phase: number, dt: number): number {
+  return oscSampleId(WAVE_ID[wave], phase, dt);
 }
 
 /** Cubic Hermite (Catmull-Rom) interpolation between y1 and y2 at fraction f. Far less dull than linear. */
