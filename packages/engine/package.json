@@ -3,10 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@pro-studio/shared": "workspace:*" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@pro-studio/shared": "workspace:*"
+  },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "test": "tsx --test \"test/*.test.ts\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
   }
 }

@@ -90,3 +90,52 @@ export function noise(seconds: number, seed = 1): Float32Array {
   for (let i = 0; i < out.length; i++) out[i] = (r() * 2 - 1) * 0.3;
   return out;
 }
+
+/** A sine at an exact frequency, for filter and pitch tests. */
+export function sine(freq: number, seconds: number, sr = SR, amp = 1): Float32Array {
+  const out = new Float32Array(Math.floor(seconds * sr));
+  for (let i = 0; i < out.length; i++) out[i] = amp * Math.sin((2 * Math.PI * freq * i) / sr);
+  return out;
+}
+
+import type { Source } from '../src/index';
+
+/** Drive a source directly: run `script` actions at exact frames and collect what it renders. */
+export function runSource(src: Source, seconds: number, script: Array<[number, (s: Source) => void]> = [], sr = SR): { l: Float32Array; r: Float32Array } {
+  const total = Math.floor(seconds * sr);
+  const l = new Float32Array(total);
+  const r = new Float32Array(total);
+  const acts = script.map(([t, f]) => [Math.round(t * sr), f] as const).sort((a, b) => a[0] - b[0]);
+  let cursor = 0;
+  let a = 0;
+  while (cursor < total) {
+    while (a < acts.length && (acts[a] as readonly [number, unknown])[0] <= cursor) {
+      (acts[a] as readonly [number, (s: Source) => void])[1](src);
+      a++;
+    }
+    const next = a < acts.length ? Math.min(total, (acts[a] as readonly [number, unknown])[0]) : total;
+    const end = Math.min(next, cursor + 512);
+    src.render(l, r, cursor, end);
+    cursor = end;
+  }
+  return { l, r };
+}
+
+/** Frequency from rising zero crossings over [from, to) seconds. Good to a fraction of a percent on clean tones. */
+export function zeroCrossFreq(x: Float32Array, from: number, to: number, sr = SR): number {
+  const a = Math.floor(from * sr);
+  const b = Math.floor(to * sr);
+  let first = -1;
+  let last = -1;
+  let count = 0;
+  for (let i = a + 1; i < b; i++) {
+    if ((x[i - 1] as number) < 0 && (x[i] as number) >= 0) {
+      const frac = -(x[i - 1] as number) / ((x[i] as number) - (x[i - 1] as number));
+      const pos = i - 1 + frac;
+      if (first < 0) first = pos;
+      last = pos;
+      count++;
+    }
+  }
+  return count < 2 ? 0 : ((count - 1) * sr) / (last - first);
+}

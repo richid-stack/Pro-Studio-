@@ -2,6 +2,7 @@
  * Project document model (schema v1). The document is plain JSON so it can be saved locally,
  * synced to the cloud and diffed. Any change to its shape bumps PROJECT_SCHEMA_VERSION and adds a migration.
  */
+import type { RollShape } from './rhythm';
 import type { Genre, ScaleId } from './theory';
 
 export const PROJECT_SCHEMA_VERSION = 1;
@@ -36,7 +37,8 @@ export interface MixSettings {
 
 export type DrumName = 'kick' | 'snare' | 'clap' | 'hat' | 'ohat' | 'rim';
 export type InstrumentName = 'sub' | 'rhodes' | 'pluck' | 'pad' | 'organ' | 'chop' | 'sampler';
-export type RollShape = 'flat' | 'up' | 'down';
+/** One definition, in rhythm.ts, so the saved project and the roll builder cannot drift apart. */
+export type { RollShape };
 
 interface ChannelBase {
   id: string;
