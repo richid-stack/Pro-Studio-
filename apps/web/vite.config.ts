@@ -13,6 +13,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@pro-studio/shared': fromRoot('packages/shared/src/index.ts'),
+      '@pro-studio/engine': fromRoot('packages/engine/src/index.ts'),
       '@pro-studio/ui/styles': fromRoot('packages/ui/src/styles'),
       '@pro-studio/ui': fromRoot('packages/ui/src/index.ts'),
     },

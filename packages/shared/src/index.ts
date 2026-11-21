@@ -7,3 +7,7 @@ export * from './rhythm';
 export * from './edit';
 export * from './history';
 export * from './starter';
+export * from './controls';
+export * from './pianoroll';
+export * from './workspace';
+export * from './validate';
