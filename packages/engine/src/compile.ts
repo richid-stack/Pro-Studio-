@@ -12,7 +12,8 @@ export interface CompiledProject {
   masterGain: number;
 }
 
-function specFor(ch: Channel, p808: Project['p808']): ChannelSpec {
+/** The engine channel for a project channel. Also used to audition a sound before it is added to the project. */
+export function specFor(ch: Channel, p808: Project['p808']): ChannelSpec {
   if (ch.type === 'drum') return { id: ch.id, kind: 'drum', drum: ch.drum };
   switch (ch.inst) {
     case 'sub':
