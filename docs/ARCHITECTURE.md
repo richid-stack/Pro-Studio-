@@ -73,6 +73,14 @@ Panels (Browser, Channel rack, Piano roll, Playlist, Mixer, Inspector) live in a
 - Panels can be detached into floating windows and tabbed together. Layout is saved per project and as named presets (Beat, Mix, Arrange, Performance).
 - Below the tablet breakpoint the layout becomes one panel at a time with bottom navigation; it is designed, not shrunk.
 
+### How the web app is put together
+
+- **State.** Small stores (`createStore` / `useStore`): the project with undo history (`studio`), view state (`ui`), the browser (`browser`), preferences and layout. `studio.edit(fn, { key, coalesceMs })` is the only way a project changes, and edits with the same key inside the window merge into one undo step, so a drag is one step.
+- **Logic in packages.** What a click or key means is decided in `@pro-studio/shared` and tested without a DOM: roll gestures and keys, the velocity lane, the browser tree (building, filtering, flattening to visible rows, WAI-ARIA tree keys, type-ahead), shortcuts, workspace layout, modes. Components wire events to those functions.
+- **Audio never waits for the UI.** The engine runs in an AudioWorklet and the UI sends commands; the playhead and meters are written to DOM refs from telemetry, not through React renders.
+- **Canvas views.** The roll draws only what is visible, from design tokens read once per theme (`lib/canvasTheme.ts`), and keeps an accessible list of notes beside it.
+- **Browser panel.** A single flat `role="tree"` with a roving tab stop. Choosing an item goes through `features/browser/actions.ts`, which the channel rack's drop target shares, so the menu, the tree and a drop all add a sound the same way.
+
 ## 5b. Experience modes: Beginner, Standard, Pro
 
 One engine and one project format, three levels of interface. Implemented as a registry in `@pro-studio/shared` (`modes.ts`, tested) that the UI queries with `isFeatureVisible(id, mode)`.
@@ -128,7 +136,7 @@ AI features call a model service through the API with per-user rate limits and c
 ## 9. Quality gates
 
 - `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm contrast`, `pnpm build` run in CI on every push (`.github/workflows/ci.yml`).
-- Pure packages are tested with `node:test`. `apps/web` uses Vitest and Testing Library; Playwright covers workflows (play a note from the keyboard, drag a sample onto a channel, maximize the roll) and takes screenshots at 390, 768, 1280 and 1920 px wide for visual review.
+- Pure packages are tested with `node:test`. `apps/web` has no component unit tests: its logic lives in the packages, and Playwright covers the workflows (play a note from the keyboard, draw and edit notes, drag a sound onto the rack, maximize the roll) and takes screenshots at 390, 768, 1280 and 1920 px wide for visual review.
 - An axe-core pass runs in Playwright for each screen.
 - Audio is tested offline: render, then assert on the samples (peak, RMS, spectral centroid, timing of onsets using the same detector shipped in the product).
 - Budgets: initial JS under 250 kB gzipped before the audio engine loads, keyboard-to-sound latency measured and recorded, no main-thread task over 50 ms during playback.

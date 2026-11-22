@@ -23,9 +23,22 @@ The first milestone you asked for.
 - Docking workspace: resizable, scrollable, maximizable panels; saved layouts; focus mode.
 - Pro piano roll (canvas): draw / select / slice / erase tools, marquee, multi-select, drag, edge-resize, snap grid with triplets and swing, velocity lane, scale highlight with snap-to-scale, ghost notes from other channels, chord stamp, strum and humanize, zoom on both axes with the wheel and keyboard, keyboard-played notes with record.
 - Laptop keyboard plays the focused instrument everywhere, with on-screen octave and velocity indicator and a visible "keys active" state. Two layouts.
-- Sound browser: folders, tags, search, favorites, waveform preview on hover, drag onto a channel / the roll / the playlist, key and BPM detection shown per sample.
+- Sound browser: a tree of the project's channels, the sound library and the starter beats; tabs (All, Project, Sounds, Starred), search, tag filters, stars, click to preview, Enter or double-click to add, drag onto the rack. Still to come: packs, recordings and your own files, waveform preview on hover, key and BPM detection per sample, and dragging onto the roll and the playlist (all arrive with sample loading).
 - Undo/redo as patches. Autosave to IndexedDB. Command palette. Shortcut map.
 - **Mode switcher (Beginner / Standard / Pro)** wired through the whole workspace from the first panel: every panel and control declares its mode in the feature registry; Pro-only data shows as a summary in lower modes.
+### Phase 1 status
+
+Built and verified in Chromium (62 Playwright tests, 4 viewports, both themes, keyboard-only paths): docking workspace with splitters and maximize, channel rack, canvas piano roll with mouse and keyboard editing and a velocity lane, mixer, the browser tree, keyboard piano, undo and redo, autosave, project file open and save, WAV export, the three modes.
+
+Not built yet (each is a roadmap line, none is faked in the UI):
+
+- Playlist arrangement (the Playlist panel is labelled Preview and shows one looping pattern; clips arrive in Phase 3).
+- Loading your own samples, the sampler and chopping (the Sampler channel type exists in the data model and in the engine; the UI to load a file does not).
+- Browser: packs, recordings, your files; hover waveform preview; key and BPM detection.
+- Mixer insert slots and the Plugins browser tab (they arrive with the Phase 2 effects).
+- Piano roll: resizing from the start edge, ghost notes, scrolling while a drag reaches the edge, recording played notes into the roll, seeking from the ruler with the keyboard.
+- Command palette, floating and tabbed panels.
+
 - Exit (verified in Playwright): switching modes changes what is visible without changing the project; play 12 notes from the keyboard with sound; draw, move, resize and delete notes with the mouse; maximize and restore the roll; drag a sample from the browser onto a channel and hear it; reload and find the project intact; axe passes; 4 viewport screenshots reviewed.
 
 ## Phase 2: Engine v2
