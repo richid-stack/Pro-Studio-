@@ -18,5 +18,7 @@ export default defineConfig({
       '@pro-studio/ui': fromRoot('packages/ui/src/index.ts'),
     },
   },
+  // module workers, so the export worker can import the engine like any other module
+  worker: { format: 'es' },
   build: { target: 'es2022', sourcemap: true },
 });

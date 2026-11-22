@@ -1,57 +1,51 @@
-import { MODES, MODE_LABELS, MODE_SUMMARIES } from '@pro-studio/shared';
-import { Segmented } from './components/Segmented';
-import { KeysPanel } from './features/keys/KeysPanel';
-import { preferences } from './state/preferences';
-import { usePreferences } from './state/usePreferences';
+import { useEffect, useSyncExternalStore } from 'react';
+import { MOBILE_BREAKPOINT, findChannel } from '@pro-studio/shared';
+import { studio, useProject } from './state/studio';
+import { attachTypingPiano } from './state/piano';
+import { uiState, useUi } from './state/ui';
+import { StatusBar } from './features/StatusBar';
+import { ExportDialog } from './features/dialogs/ExportDialog';
+import { HelpDialog } from './features/dialogs/HelpDialog';
+import { useGlobalShortcuts } from './features/shortcuts/useGlobalShortcuts';
+import { TransportBar } from './features/transport/TransportBar';
+import { Workspace } from './features/workspace/Workspace';
 
-/** Working title. Rename here and in index.html. */
-const APP_NAME = 'Pro Studio';
+const query = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`;
+const subscribeWidth = (cb: () => void): (() => void) => {
+  const mq = window.matchMedia(query);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+};
+const useIsMobile = (): boolean => useSyncExternalStore(subscribeWidth, () => window.matchMedia(query).matches, () => false);
+
+/** Keep a real channel selected, so the keys and the piano roll always have somewhere to play. */
+function useEnsureSelection(): void {
+  const project = useProject();
+  const selected = useUi((s) => s.selectedChannelId);
+  useEffect(() => {
+    if (selected && findChannel(project, selected)) return;
+    const first = project.channels.find((c) => c.type === 'inst') ?? project.channels[0];
+    uiState.selectChannel(first?.id ?? null);
+  }, [project, selected]);
+}
 
 export function App() {
-  const prefs = usePreferences();
+  const isMobile = useIsMobile();
+  useGlobalShortcuts(isMobile);
+  useEnsureSelection();
+  useEffect(() => {
+    studio.syncNow();
+    return attachTypingPiano();
+  }, []);
+
   return (
     <div className="app">
-      <header className="topbar">
-        <span className="brand">{APP_NAME}</span>
-        <Segmented
-          label="Experience mode"
-          value={prefs.mode}
-          options={MODES.map((m) => ({ value: m, label: MODE_LABELS[m], hint: MODE_SUMMARIES[m] }))}
-          onChange={(mode) => preferences.set({ mode })}
-        />
-        <span className="topbar-spacer" />
-        <Segmented
-          label="Theme"
-          value={prefs.theme}
-          options={[
-            { value: 'dark', label: 'Dark' },
-            { value: 'light', label: 'Light' },
-          ]}
-          onChange={(theme) => preferences.set({ theme })}
-        />
-        <Segmented
-          label="Density"
-          value={prefs.density}
-          options={[
-            { value: 'auto', label: 'Auto', hint: 'Follows the mode' },
-            { value: 'compact', label: 'Compact' },
-            { value: 'comfortable', label: 'Roomy' },
-          ]}
-          onChange={(density) => preferences.set({ density })}
-        />
-      </header>
-
-      <main className="main">
-        <h1 className="page-title">{MODE_LABELS[prefs.mode]} mode</h1>
-        <p className="page-sub" aria-live="polite">
-          {MODE_SUMMARIES[prefs.mode]}
-        </p>
-        <KeysPanel />
-        <p className="t-hint phase-note">
-          Early preview: the keyboard piano. The piano roll, sound browser and dockable workspace are the next milestone
-          (see docs/ROADMAP.md).
-        </p>
-      </main>
+      <a className="skip-link" href="#workspace">Skip to the workspace</a>
+      <TransportBar isMobile={isMobile} />
+      <Workspace isMobile={isMobile} />
+      <StatusBar />
+      <ExportDialog />
+      <HelpDialog />
     </div>
   );
 }

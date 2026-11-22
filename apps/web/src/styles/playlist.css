@@ -1,0 +1,84 @@
+/* Playlist preview: the one pattern, laid out on a timeline. */
+@layer components {
+  .playlist {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+  }
+  .playlist-note {
+    padding: var(--space-1) var(--space-3);
+    border-bottom: var(--border-width) solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+  }
+  .playlist-grid {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .playlist-corner {
+    background: var(--surface-2);
+    border-bottom: var(--border-width) solid var(--border-subtle);
+    border-right: var(--border-width) solid var(--border-subtle);
+  }
+  .playlist-ruler {
+    position: relative;
+    height: var(--control-h-sm);
+    background: var(--surface-2);
+    border-bottom: var(--border-width) solid var(--border-subtle);
+    cursor: pointer;
+    touch-action: none;
+  }
+  .ruler-bar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    padding-left: var(--space-2);
+    border-left: var(--border-width) solid var(--grid-bar);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+  .playlist-lanes {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-right: var(--border-width) solid var(--border-subtle);
+  }
+  .lane-name {
+    display: flex;
+    align-items: center;
+    height: var(--row-h);
+    padding: 0 var(--space-2);
+    overflow: hidden;
+    box-shadow: inset 0.1875rem 0 0 var(--ch);
+    font-size: var(--text-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-secondary);
+  }
+  .playlist-area {
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .playlist-canvas {
+    display: block;
+    width: 100%;
+  }
+  .playlist-head {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    background: var(--playhead);
+    pointer-events: none;
+    opacity: 0.6;
+    will-change: transform;
+  }
+}

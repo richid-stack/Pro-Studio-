@@ -1,0 +1,259 @@
+/* Browser: a dense tree of the project, the sounds and the starter beats, with tabs, search and tag filters above it. */
+@layer components {
+  .browser {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  /* ------------------------------------------------------------ tabs */
+  .tabs {
+    display: flex;
+    flex: none;
+    padding: var(--space-1) var(--space-1) 0;
+    border-bottom: var(--border-width) solid var(--border-subtle);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab {
+    flex: 1 1 auto;
+    min-height: var(--control-h);
+    padding: 0 var(--space-2);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    white-space: nowrap;
+  }
+  .tab:hover {
+    color: var(--text-primary);
+  }
+  .tab[aria-selected='true'] {
+    border-bottom-color: var(--accent);
+    color: var(--text-primary);
+  }
+
+  /* ------------------------------------------------- search, tags, help */
+  .browser-tools {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-2) var(--space-1);
+  }
+  .search {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--control-h);
+    padding: 0 var(--space-1) 0 var(--space-2);
+    background: var(--surface-inset);
+    border: var(--border-width) solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+  }
+  .search:focus-within {
+    border-color: var(--border-control);
+  }
+  .search input {
+    flex: 1 1 0;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    appearance: none;
+  }
+  .search input::-webkit-search-cancel-button {
+    appearance: none;
+  }
+  .search input:focus-visible {
+    outline: none;
+  }
+  /* the search box shows its own focus edge, so give the keyboard the same cue on the whole box */
+  .search:has(input:focus-visible) {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: -2px;
+  }
+  .search-clear {
+    width: var(--control-h-sm);
+    height: var(--control-h-sm);
+  }
+
+  .tag-row {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+  }
+  .chip {
+    min-height: var(--control-h-sm);
+    padding: 0 var(--space-2);
+    background: var(--surface-2);
+    border: var(--border-width) solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+  }
+  .chip:hover {
+    color: var(--text-primary);
+    border-color: var(--border-control);
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--accent-subtle);
+    border-color: var(--accent);
+    color: var(--text-primary);
+  }
+  .browser-help {
+    flex: none;
+    margin: 0;
+    padding: var(--space-1) var(--space-3);
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+  }
+
+  /* ------------------------------------------------------------ tree */
+  .browser-body {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-1) 0 var(--space-2);
+    scrollbar-color: var(--border-control) transparent;
+  }
+  .tree {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tree-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: var(--control-h-sm);
+    padding: 0 var(--space-2) 0 calc(var(--space-1) + var(--depth, 0) * var(--space-4));
+    border-left: 2px solid transparent;
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .tree-row:hover {
+    background: var(--surface-2);
+  }
+  .tree-row[aria-selected='true'] {
+    background: var(--surface-3);
+  }
+  .tree:focus-within .tree-row[aria-selected='true'] {
+    background: var(--accent-subtle);
+  }
+  .tree-row[aria-current='true'] {
+    border-left-color: var(--accent);
+  }
+  .tree-row:focus-visible {
+    outline-offset: -2px;
+  }
+  .tree-row[draggable='true'] {
+    cursor: grab;
+  }
+  .tree-row[draggable='true']:active {
+    cursor: grabbing;
+  }
+
+  .tree-twist,
+  .tree-icon {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--space-4);
+    color: var(--text-muted);
+  }
+  /* a closed folder's arrow points right; an open one points down */
+  .tree-twist .icon {
+    transition: transform var(--duration-fast) ease;
+  }
+  .tree-row[aria-expanded='false'] .tree-twist .icon {
+    transform: rotate(-90deg);
+  }
+  .tree-row[data-kind='folder'] .tree-icon,
+  .tree-row[data-kind='project'] .tree-icon,
+  .tree-row[data-kind='beat'] .tree-icon {
+    color: var(--accent);
+  }
+  .tree-label {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tree-row[aria-expanded] > .tree-label {
+    font-weight: var(--weight-medium);
+  }
+  .tree-hint,
+  .tree-count {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tree-count {
+    flex: none;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  /* push the actions to the right when the row has a hint that can shrink */
+  .tree-actions {
+    display: none;
+    flex: none;
+    margin-left: auto;
+    gap: 0;
+  }
+  .tree-row:hover .tree-actions,
+  .tree-row[aria-selected='true'] .tree-actions,
+  .tree-row:focus-within .tree-actions {
+    display: inline-flex;
+  }
+  /* a starred item keeps its star visible when the row is not hovered, so stars are easy to see in the list */
+  .tree-row:not(:hover, [aria-selected='true'], :focus-within) .tree-actions:has(.tree-star[aria-pressed='true']) {
+    display: inline-flex;
+  }
+  .tree-row:not(:hover, [aria-selected='true'], :focus-within) .tree-actions:has(.tree-star[aria-pressed='true']) .icon-btn:not(.tree-star) {
+    display: none;
+  }
+  .tree-actions .icon-btn {
+    width: var(--control-h-sm);
+    height: var(--control-h-sm);
+  }
+  .tree-star[aria-pressed='true'] {
+    background: transparent;
+    border-color: transparent;
+    color: var(--accent);
+  }
+
+  /* on a touch screen there is no hover, so the actions stay on the selected row and the rows are taller */
+  @media (pointer: coarse) {
+    .tree-row {
+      min-height: var(--control-h);
+    }
+    .tree-actions .icon-btn {
+      width: var(--control-h);
+      height: var(--control-h);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tree-twist .icon {
+      transition: none;
+    }
+  }
+}

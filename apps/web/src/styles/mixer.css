@@ -1,0 +1,107 @@
+/* Mixer: one strip per channel and a master strip. */
+@layer components {
+  .mixer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 0;
+    min-width: 0;
+  }
+  .mixer-strips {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .strip {
+    display: grid;
+    grid-template-rows: auto auto auto minmax(4rem, 1fr) auto auto;
+    justify-items: center;
+    gap: var(--space-1);
+    flex: none;
+    width: 5.75rem;
+    min-height: 0;
+    padding: var(--space-1) var(--space-2) var(--space-2);
+    border-right: var(--border-width) solid var(--border-subtle);
+    box-shadow: inset 0 0.1875rem 0 var(--ch, var(--border-strong));
+  }
+  .strip[data-selected] {
+    background: var(--surface-2);
+  }
+  .strip[data-muted] .strip-fader,
+  .strip[data-muted] .strip-sends {
+    opacity: 0.5;
+  }
+  .strip-master {
+    background: var(--surface-2);
+    border-left: var(--border-width) solid var(--border-strong);
+    border-right: 0;
+    --ch: var(--accent);
+  }
+  .strip-name {
+    width: 100%;
+    min-height: var(--control-h-sm);
+    margin-top: var(--space-1);
+    padding: 0 var(--space-1);
+    overflow: hidden;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .strip-name:hover {
+    background: var(--surface-3);
+  }
+  .strip-name[aria-current='true'] {
+    color: var(--accent);
+  }
+  .strip-name-static {
+    display: grid;
+    place-items: center;
+  }
+  .strip-sends {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    gap: var(--space-1);
+  }
+  .strip-sends-spacer,
+  .strip-pan-spacer,
+  .strip-buttons-spacer {
+    visibility: hidden;
+  }
+  .strip-pan-spacer {
+    height: calc(var(--hit-target) * 1.35);
+  }
+  .send {
+    display: grid;
+    justify-items: center;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    line-height: 1.1;
+  }
+  .strip-fader {
+    display: flex;
+    gap: var(--space-1);
+    min-height: 0;
+    width: 100%;
+    justify-content: center;
+  }
+  .strip-fader .meter {
+    margin-block: 0.5rem;
+  }
+  .strip-db {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .strip-buttons {
+    display: flex;
+    gap: var(--space-1);
+  }
+}

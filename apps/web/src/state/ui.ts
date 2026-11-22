@@ -2,7 +2,7 @@
 import { LAYOUT_PRESETS, fitLayout, setMaximized, toggleHidden, type LayoutPresetId, type PanelId, type SnapId, type WorkspaceLayout } from '@pro-studio/shared';
 import { createStore, safeStorage, useStore } from './store';
 
-export type RollTool = 'draw' | 'select' | 'erase';
+export type RollTool = 'draw' | 'select' | 'erase' | 'pan';
 
 interface UiState {
   selectedChannelId: string | null;

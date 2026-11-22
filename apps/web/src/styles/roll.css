@@ -1,0 +1,176 @@
+/* Piano roll: toolbar, ruler, key column, the scrolling note grid and the velocity lane. Canvases are drawn from tokens in JS. */
+@layer components {
+  .roll {
+    --roll-keys-w: 4rem;
+    --roll-lane-h: minmax(2.5rem, min(28%, 5rem));
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-width: 0;
+    min-height: 0;
+  }
+  .roll > .empty {
+    align-self: start;
+  }
+
+  .roll-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+    padding: var(--space-1) var(--space-2);
+    background: var(--surface-2);
+    border-bottom: var(--border-width) solid var(--border-subtle);
+  }
+  /* in the panel header the toolbar loses its own row and scrolls sideways when the panel is narrow */
+  .roll-tools-slot {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .panel-tools:has(.roll-tools-slot) {
+    flex: 1 1 0;
+    margin-left: var(--space-3);
+  }
+  .roll-tools-slot .roll-toolbar {
+    flex: 1 0 auto;
+    flex-wrap: nowrap;
+    padding: 0;
+    background: none;
+    border: 0;
+  }
+  .roll-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--text-muted);
+  }
+  .roll-readout {
+    margin-left: auto;
+    min-width: 11ch;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: pre;
+  }
+
+  /* ruler on top, keys on the left, notes in the middle, velocity lane underneath */
+  .roll-body {
+    display: grid;
+    grid-template-columns: var(--roll-keys-w) minmax(0, 1fr);
+    grid-template-rows: var(--control-h-sm) minmax(0, 1fr) var(--roll-lane-h);
+    min-width: 0;
+    min-height: 0;
+    background: var(--surface-inset);
+  }
+  .roll-body[data-lane='off'] {
+    grid-template-rows: var(--control-h-sm) minmax(0, 1fr);
+  }
+  .roll-corner {
+    background: var(--surface-2);
+    border-bottom: var(--border-width) solid var(--border-strong);
+    border-right: var(--border-width) solid var(--border-strong);
+  }
+  .roll-ruler {
+    display: block;
+    height: 100%;
+    cursor: pointer;
+    touch-action: none;
+    justify-self: start;
+  }
+  .roll-keys {
+    min-height: 0;
+    overflow: hidden;
+    background: var(--key-white);
+  }
+  .roll-keys canvas {
+    display: block;
+    width: 100%;
+    cursor: pointer;
+    touch-action: none;
+  }
+
+  .roll-scroll {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-color: var(--border-control) transparent;
+    background: var(--surface-inset);
+  }
+  /* the global focus ring, drawn inside the box so the scroll area does not clip it */
+  .roll-scroll:focus-visible {
+    outline-offset: -2px;
+  }
+  /* the spacer gives the scroll area its full size; the view stays in the corner and draws only what is visible */
+  .roll-stage {
+    display: grid;
+    width: max-content;
+    min-width: 100%;
+    min-height: 100%;
+  }
+  .roll-spacer {
+    grid-area: 1 / 1;
+    pointer-events: none;
+  }
+  .roll-view {
+    position: sticky;
+    top: 0;
+    left: 0;
+    grid-area: 1 / 1;
+    align-self: start;
+    justify-self: start;
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .roll[data-tool='pan'] .roll-view {
+    touch-action: pan-x pan-y;
+  }
+  .roll-view canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .roll-head {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--playhead);
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .roll-lane-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-2);
+    border-top: var(--border-width) solid var(--border-strong);
+    border-right: var(--border-width) solid var(--border-strong);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+  .roll-lane {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .roll-lane canvas {
+    display: block;
+    height: 100%;
+    cursor: ns-resize;
+    touch-action: none;
+  }
+
+  .roll[data-mobile] {
+    --roll-keys-w: 3.25rem;
+  }
+}

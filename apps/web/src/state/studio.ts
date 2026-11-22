@@ -66,6 +66,12 @@ export const studio = {
     store.set(createHistory(p));
     afterChange();
   },
+  /** Swap in a different project as an edit, so Undo brings the previous one back (starters, opening a file). */
+  replace(p: Project): void {
+    const prev = store.get();
+    store.set(commit(prev, p));
+    afterChange();
+  },
   newFromStarter(genre: Genre): void {
     this.load(createStarterProject(genre));
   },
