@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { openApp } from './helpers';
+import { heard, openApp, resetHeard } from './helpers';
 
 test.use({ viewport: { width: 1280, height: 800 } });
 
@@ -78,13 +78,14 @@ test.describe('browser tabs and tree', () => {
   });
 
   test('typing a letter in the tree never plays the piano', async ({ page }) => {
-    await openApp(page, { mode: 'standard' });
+    await openApp(page, { mode: 'standard', audio: true });
     await page.getByRole('button', { name: 'Preview sounds when selected' }).click();
     await item(page, 'Current project').click();
+    await resetHeard(page);
     await page.keyboard.press('z');
     await page.keyboard.press('x');
-    await page.waitForTimeout(400);
-    expect(await peak(page)).toBeLessThan(0.002);
+    await page.waitForTimeout(600);
+    expect(await heard(page)).toBeLessThan(0.002);
   });
 });
 
@@ -135,26 +136,29 @@ test.describe('search and tags', () => {
 
 test.describe('previewing and adding', () => {
   test('clicking a sound plays it, and the speaker button turns that off', async ({ page }) => {
-    await openApp(page);
+    await openApp(page, { audio: true });
+    await resetHeard(page);
     await item(page, /^Snare, Three/).click();
-    await expect.poll(() => peak(page), { timeout: 8000 }).toBeGreaterThan(0.01);
+    await expect.poll(() => heard(page), { timeout: 8000 }).toBeGreaterThan(0.01);
     await expect.poll(() => peak(page), { timeout: 10_000 }).toBeLessThan(0.002);
     await page.getByRole('button', { name: 'Preview sounds when selected' }).click();
     expect((await stored(page)).autoPreview).toBe(false);
+    await resetHeard(page);
     await item(page, /^Clap, Layered/).click();
-    await page.waitForTimeout(500);
-    expect(await peak(page)).toBeLessThan(0.002);
+    await page.waitForTimeout(700);
+    expect(await heard(page)).toBeLessThan(0.002);
     // the row's own preview button still works
     await page.getByRole('button', { name: 'Preview Clap' }).click();
-    await expect.poll(() => peak(page), { timeout: 8000 }).toBeGreaterThan(0.01);
+    await expect.poll(() => heard(page), { timeout: 8000 }).toBeGreaterThan(0.01);
   });
 
   test('Space previews the focused sound', async ({ page }) => {
-    await openApp(page);
+    await openApp(page, { audio: true });
     await page.getByRole('button', { name: 'Preview sounds when selected' }).click();
     await item(page, /^Snare, Three/).click();
+    await resetHeard(page);
     await page.keyboard.press(' ');
-    await expect.poll(() => peak(page), { timeout: 8000 }).toBeGreaterThan(0.01);
+    await expect.poll(() => heard(page), { timeout: 8000 }).toBeGreaterThan(0.01);
   });
 
   test('Enter adds the sound as a channel, selects it, and undo takes it away', async ({ page }) => {
@@ -240,19 +244,5 @@ test.describe('stars', () => {
     await item(page, /^Kick, 7 hits/).click();
     await page.keyboard.press('Alt+s');
     expect((await stored(page)).starred ?? []).toEqual([]);
-  });
-});
-
-test.describe('on a phone', () => {
-  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-
-  test('the browser fits the screen and a tap adds a sound with the add button', async ({ page }) => {
-    await openApp(page);
-    await page.getByRole('button', { name: 'Browser', exact: true }).click();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
-    await item(page, /^Rim,/).tap();
-    await page.getByRole('button', { name: 'Add Rim to the project' }).tap();
-    await page.getByRole('button', { name: 'Rack', exact: true }).tap();
-    await expect(page.getByText('8 channels')).toBeVisible();
   });
 });

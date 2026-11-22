@@ -177,7 +177,7 @@ test.describe('piano roll with the keyboard only', () => {
   });
 
   test('typing-piano letters are left to the piano, so the roll does not swallow them', async ({ page }) => {
-    await openApp(page);
+    await openApp(page, { audio: true });
     await selectChannel(page, 'Keys');
     await page.locator('.roll-scroll').focus();
     await page.keyboard.down('z');

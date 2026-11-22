@@ -1,8 +1,11 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 declare global {
   interface Window {
     __peak: () => number;
+    /** The loudest sample seen since the last reset: a drum hit is over before a poll could catch it. */
+    __heard: () => number;
+    __heardReset: () => void;
     __ctx?: AudioContext;
   }
 }
@@ -25,6 +28,21 @@ async function tapAudio(page: Page): Promise<void> {
       }
       return result;
     };
+    let heard = 0;
+    const read = (): number => {
+      if (!tapped) return 0;
+      const buf = new Float32Array(tapped.fftSize);
+      tapped.getFloatTimeDomainData(buf);
+      return buf.reduce((p, x) => Math.max(p, Math.abs(x)), 0);
+    };
+    // fftSize 2048 covers about 43 ms, so reading every 20 ms sees every sample at least once
+    setInterval(() => {
+      heard = Math.max(heard, read());
+    }, 20);
+    window.__heard = () => Math.max(heard, read());
+    window.__heardReset = () => {
+      heard = 0;
+    };
     window.__peak = () => {
       if (!tapped) return -1;
       const buf = new Float32Array(tapped.fftSize);
@@ -46,7 +64,10 @@ export interface Note {
 }
 
 /** Open the app with a clean slate: a chosen mode and theme, every console problem collected. */
-export async function openApp(page: Page, opts: { mode?: Mode; theme?: 'dark' | 'light' } = {}) {
+export async function openApp(page: Page, opts: { mode?: Mode; theme?: 'dark' | 'light'; audio?: boolean } = {}) {
+  // Headless Firefox on CI reads silence from the audio tap, so a test that measures sound cannot pass there.
+  // Firefox is checked by hand instead (docs/TESTING.md, row L1b).
+  if (opts.audio) test.skip(page.context().browser()?.browserType().name() === 'firefox', 'headless Firefox reads silence from the audio tap; see TESTING.md L1b');
   const problems: string[] = [];
   page.on('console', (m) => {
     if (m.type() === 'error' || m.type() === 'warning') problems.push(`${m.type()}: ${m.text()}`);
@@ -121,3 +142,7 @@ export async function rollGeometry(page: Page) {
 export async function noHorizontalOverflow(page: Page): Promise<number> {
   return page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 }
+
+/** Loudest output since the last `resetHeard`. */
+export const heard = (page: Page): Promise<number> => page.evaluate(() => window.__heard());
+export const resetHeard = (page: Page): Promise<void> => page.evaluate(() => window.__heardReset());

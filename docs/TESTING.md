@@ -11,10 +11,14 @@ Goal: machines find the bugs; the owner only tests what machines cannot. Every l
 | Repo-health checks | Broken architecture rules: dependency direction, hex/px literals, unlicensed sounds, bundle size | Local, CI | `pnpm check:deps`, `check:tokens`, `check:sounds`, `check:budget` (after build) |
 | Repo-check tests | The checks themselves | Local, CI | `pnpm test:scripts` |
 | Contrast gate | Any token pair under WCAG 2.2 AA, both themes | Local, CI | `pnpm contrast` |
-| Browser e2e (Playwright) | The real app in a real browser (62 tests): keys and the browser panel make real sound, notes are drawn, moved and deleted with the mouse and the keyboard, modes switch, stars and layout survive a reload, no horizontal overflow at 390/768/1280/1920 px, no console errors or failed requests | Local (Chromium), CI (Chromium, Firefox, WebKit, Pixel 7, iPhone 14 emulation) | `pnpm e2e` |
+| Browser e2e (Playwright) | The real app in a real browser (64 tests): keys and the browser panel make real sound, notes are drawn, moved and deleted with the mouse and the keyboard, modes switch, stars and layout survive a reload, no horizontal overflow at 390/768/1280/1920 px, no console errors or failed requests | Local (Chromium), CI (Chromium, Firefox, WebKit, Pixel 7, iPhone 14 emulation) | `pnpm e2e` |
 | Static security (CodeQL, dependency review, secret scanning) | Vulnerable code and dependencies, leaked secrets | CI, GitHub | `.github/workflows/codeql.yml`, `dependency-review.yml` |
 | AI reviewers | Rule violations and bugs a linter cannot see | On pull requests | See `docs/REVIEW-AND-CI.md` |
 | Real devices | What no emulator reproduces (below) | The owner | Scripts below |
+
+### Which project runs what
+
+Chromium, Firefox and WebKit run every spec (WebKit has passed once on CI, so it now fails the build; Firefox stays experimental). The Pixel 7 and iPhone 14 projects run only `e2e/phone.spec.ts`: on a phone the workspace shows one panel at a time, so the desktop specs, which expect every panel on screen, do not apply. Tests that measure sound pass `audio: true` to `openApp`; they are skipped on headless Firefox, which reads silence from the audio tap on CI, and `L1b` below covers Firefox by hand. Drum hits are over in a few milliseconds, so those tests read the loudest sample since a reset (`resetHeard` and `heard`) instead of polling the instantaneous level.
 
 ### Running one spec or a built bundle
 

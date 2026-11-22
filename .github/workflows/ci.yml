@@ -49,7 +49,7 @@ jobs:
         include:
           - { project: chromium, browser: chromium, experimental: false }
           - { project: firefox, browser: firefox, experimental: true }
-          - { project: webkit, browser: webkit, experimental: true }
+          - { project: webkit, browser: webkit, experimental: false }
           - { project: mobile-chrome, browser: chromium, experimental: true }
           - { project: mobile-safari, browser: webkit, experimental: true }
     env:
