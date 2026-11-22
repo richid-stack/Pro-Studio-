@@ -32,7 +32,7 @@ export interface WorkspaceLayout {
 export type LayoutPresetId = 'beat' | 'arrange' | 'mix' | 'perform';
 
 export const LAYOUT_PRESETS: Readonly<Record<LayoutPresetId, { label: string; layout: WorkspaceLayout }>> = {
-  beat: { label: 'Beat', layout: { browserW: 232, rackW: 600, topH: 230, mixerH: 232, hidden: [], maximized: null } },
+  beat: { label: 'Beat', layout: { browserW: 232, rackW: 600, topH: 208, mixerH: 196, hidden: [], maximized: null } },
   arrange: { label: 'Arrange', layout: { browserW: 200, rackW: 400, topH: 420, mixerH: 150, hidden: [], maximized: null } },
   mix: { label: 'Mix', layout: { browserW: 200, rackW: 360, topH: 190, mixerH: 400, hidden: [], maximized: null } },
   perform: { label: 'Perform', layout: { browserW: 232, rackW: 600, topH: 150, mixerH: 150, hidden: ['playlist'], maximized: null } },

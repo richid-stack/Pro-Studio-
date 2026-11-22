@@ -3,7 +3,6 @@
  * first second. They are starting points written from the conventions of each genre (tempo, drum placement,
  * bass movement, chord colour), not finished songs; the user changes everything.
  */
-import { addNote } from './edit';
 import { PROGRESSIONS, realizeProgression, type Genre } from './theory';
 import { PROJECT_SCHEMA_VERSION, STEPS_PER_BAR, type Channel, type DrumChannel, type DrumName, type InstrumentChannel, type InstrumentName, type MixSettings, type Note, type Project } from './project';
 

@@ -13,3 +13,7 @@ export * from './workspace';
 export * from './validate';
 export * from './rollGesture';
 export * from './rollKeys';
+export * from './velocityLane';
+export * from './browserTree';
+export * from './sounds';
+export * from './shortcuts';

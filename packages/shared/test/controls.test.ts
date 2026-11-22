@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { FADER_MIN_DB, gridMove, dbToFader, faderToDb, formatDb, formatPan, meterPosition, stepValue, valueFromDrag } from '../src/index';
+import { FADER_MIN_DB, gridMove, dbToFader, faderToDb, formatDb, formatPan, meterPosition, speakDb, stepValue, valueFromDrag } from '../src/index';
 
 describe('drag maths', () => {
   const r = { min: 0, max: 1 };
@@ -77,5 +77,17 @@ describe('gridMove', () => {
   it('ignores other keys and survives an empty grid', () => {
     assert.equal(gridMove(0, 0, 'a', 3, 16), null);
     assert.deepEqual(gridMove(5, 99, 'ArrowDown', 0, 0), { row: 0, col: 0 });
+  });
+});
+
+describe('speakDb', () => {
+  it('says levels the way a person would', () => {
+    assert.equal(speakDb(-4), 'minus 4 decibels');
+    assert.equal(speakDb(-4.5), 'minus 4.5 decibels');
+    assert.equal(speakDb(2), 'plus 2 decibels');
+    assert.equal(speakDb(1), 'plus 1 decibel');
+    assert.equal(speakDb(0), '0 decibels');
+    assert.equal(speakDb(0.04), '0 decibels');
+    assert.equal(speakDb(-60), 'silent');
   });
 });

@@ -51,6 +51,16 @@ export function formatDb(db: number): string {
   return `${r > 0 ? '+' : ''}${r.toFixed(1)}`;
 }
 
+/** A level as a screen reader should say it: "minus 4 decibels", not "-4.0". */
+export function speakDb(db: number): string {
+  if (db <= FADER_MIN_DB + 0.05) return 'silent';
+  const r = Math.round(db * 10) / 10;
+  if (r === 0) return '0 decibels';
+  const n = Math.abs(r);
+  const text = Number.isInteger(n) ? String(n) : n.toFixed(1);
+  return `${r < 0 ? 'minus' : 'plus'} ${text} ${n === 1 ? 'decibel' : 'decibels'}`;
+}
+
 export function formatPan(pan: number): string {
   const p = Math.round(clamp(pan, -1, 1) * 100);
   return p === 0 ? 'C' : p < 0 ? `${-p}L` : `${p}R`;
@@ -85,4 +95,10 @@ export function gridMove(row: number, col: number, key: string, rows: number, co
     default:
       return null;
   }
+}
+
+/** Meter ballistics: a rise is shown at once, a fall eases down at `releasePerSec` of full scale per second. */
+export function meterFall(prev: number, next: number, dtMs: number, releasePerSec = 1.2): number {
+  const fallen = prev - (releasePerSec * Math.max(0, dtMs)) / 1000;
+  return Math.max(0, Math.max(next, fallen));
 }

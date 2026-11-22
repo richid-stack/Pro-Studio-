@@ -44,6 +44,11 @@ export function setSwing(p: Project, swing: number): Project {
   return { ...p, swing: clamp(swing, 0, 1) };
 }
 
+export function setProjectName(p: Project, name: string): Project {
+  const next = name.trim().slice(0, 80) || 'Untitled beat';
+  return next === p.name ? p : { ...p, name: next };
+}
+
 export function setKey(p: Project, key: number): Project {
   const pc = ((Math.round(key) % 12) + 12) % 12;
   return pc === p.key ? p : { ...p, key: pc };
