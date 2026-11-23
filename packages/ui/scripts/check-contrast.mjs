@@ -87,6 +87,15 @@ const checks = [
   ['--key-white-text', '--key-white', 4.5],
   ['--key-black-text', '--key-black', 4.5],
   ['--accent-contrast', '--accent-pressed', 4.5],
+  // chrome: the header strips and the numbers display
+  ...['--chrome-bar', '--chrome-menu', '--chrome-lcd'].map((bg) => ['--chrome-text', bg, 4.5]),
+  ['--chrome-hint', '--chrome-bar', 4.5],
+  ['--lcd-pale-ink', '--lcd-pale', 4.5],
+  // lit state: the dark icon on the glowing face, and the LED against every panel
+  ['--lit-ink', '--lit-core', 4.5],
+  ['--lit-ink', '--lit-glow', 4.5],
+  ...PANELS.map((bg) => ['--led-on', bg, 3]),
+  ...PANELS.map((bg) => ['--record', bg, 3]),
   ...CHANNELS.flatMap((c) => [[c, '--surface-1', 3], [c, '--surface-inset', 3], ['--text-on-channel', c, 4.5]]),
 ];
 

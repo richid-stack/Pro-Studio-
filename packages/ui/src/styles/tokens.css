@@ -1,7 +1,8 @@
 /*
  * Design tokens: the single source of truth for colour, type, space, shape, motion and layering.
- * Identity: "Graphite & Amber". Cool graphite surfaces so colour is reserved for meaning (channels, meters,
- * playhead), one amber accent, and no gradients or glows unless they communicate state.
+ * Identity: "Slate & Amber". A blue-grey slate desk with thin black inset bevels, a pale LCD for the numbers,
+ * orange for what is lit or active and green for LEDs and levels. The values come from butterDAWg's design
+ * language (see docs/DESIGN-SYSTEM.md, "Provenance"); depth is carved with inset shadows, not drop shadows.
  *
  * Three tiers: primitives (raw values) -> semantic (what it means) -> component (how a part uses it, in the
  * component's own stylesheet). Never use a primitive or a hex value in a component.
@@ -10,27 +11,37 @@
 
 /* ---------------------------------------------------------------- primitives */
 :root {
-  --gray-1000: #07090c;
-  --gray-950: #0b0d12;
-  --gray-900: #10131a;
-  --gray-850: #151922;
-  --gray-800: #1b202a;
-  --gray-750: #222834;
-  --gray-700: #2b3240;
-  --gray-600: #3a4254;
-  --gray-500: #6a7488;
-  --gray-400: #8d96aa;
-  --gray-300: #aeb6c7;
-  --gray-200: #cfd4e0;
-  --gray-100: #e7eaf1;
-  --gray-50: #f4f6fa;
-  --gray-0: #ffffff;
+  /* slate ramp: the dark theme's surfaces, wells and bevels */
+  --slate-950: #181e22;
+  --slate-900: #242f35;
+  --slate-850: #2e3a41;
+  --slate-800: #333d43;
+  --slate-750: #3f484d;
+  --slate-700: #434c51;
+  --slate-650: #4a5459;
+  --slate-600: #596267;
+  --slate-500: #959ea2;
+  --slate-400: #bdc7cd;
+  --slate-300: #dbe3e8;
+  --slate-100: #f0f8ff;
+
+  /* paper ramp: the light theme's surfaces, the same slate hue turned up */
+  --paper-0: #ffffff;
+  --paper-50: #f1f5f7;
+  --paper-100: #e6ecef;
+  --paper-150: #dbe3e7;
+  --paper-200: #cfd9de;
+  --paper-250: #c2ced5;
+  --paper-400: #b9c4ca;
+  --ink-950: #11181c;
+  --ink-800: #2a373d;
+  --ink-600: #3f4e56;
 
   --amber-300: #ffc66b;
-  --amber-400: #ffae3d;
-  --amber-500: #e8962a;
-  --amber-700: #9a5200;
-  --amber-800: #7d4200;
+  --amber-400: #ffa64a;
+  --amber-500: #f87911;
+  --amber-700: #8c4a00;
+  --amber-800: #6f3a00;
   --amber-ink: #1a1100;
 
   --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -67,7 +78,7 @@
 
   /* shape */
   --radius-xs: 2px;
-  --radius-sm: 4px;
+  --radius-sm: 3px;
   --radius-md: 6px;
   --radius-lg: 10px;
   --radius-xl: 14px;
@@ -108,6 +119,12 @@
   --panel-header-h: 32px;
   --browser-w: 260px;
   --hit-target: 24px;
+
+  /* icons: drawn on a 20-unit grid, shown at these sizes. The tone layer is the quiet half of a two-tone icon. */
+  --icon-sm: 1rem;
+  --icon-md: 1.25rem;
+  --icon-lg: 1.5rem;
+  --icon-tone-opacity: 0.4;
 }
 
 /* ------------------------------------------------------------------ density */
@@ -126,51 +143,55 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --bg: var(--gray-950);
-  --surface-inset: var(--gray-1000);
-  --surface-1: var(--gray-900);
-  --surface-2: var(--gray-850);
-  --surface-3: var(--gray-800);
-  --surface-4: var(--gray-750);
+  --bg: var(--slate-900);
+  --surface-inset: var(--slate-950);
+  --surface-1: var(--slate-800);
+  --surface-2: var(--slate-750);
+  --surface-3: var(--slate-700);
+  --surface-4: var(--slate-650);
 
-  --border-subtle: var(--gray-750);
-  --border-strong: var(--gray-600);
-  --border-control: var(--gray-500);
+  --border-subtle: #1d262b;
+  --border-strong: #10161a;
+  --border-control: var(--slate-500);
 
-  --text-primary: var(--gray-100);
-  --text-secondary: var(--gray-300);
-  --text-muted: var(--gray-400);
-  --text-disabled: var(--gray-500);
+  --text-primary: var(--slate-100);
+  --text-secondary: var(--slate-300);
+  --text-muted: var(--slate-400);
+  --text-disabled: #7d8486;
 
   --accent: var(--amber-400);
   --accent-hover: var(--amber-300);
   --accent-pressed: var(--amber-500);
   --accent-contrast: var(--amber-ink);
-  --accent-subtle: #3b2a0f;
-  --focus-ring: var(--gray-50);
+  --accent-subtle: #4a3418;
+  --focus-ring: #ffffff;
 
-  --success: #5ce0aa;
+  --success: #5cff5c;
   --warning: #ffd23f;
-  --danger: #ff7a66;
+  --danger: #ffa192;
   --danger-fill: #c8362a;
-  --danger-contrast: var(--gray-0);
+  --danger-contrast: #ffffff;
 
-  --meter-ok: #5ce0aa;
+  --meter-ok: #5cff5c;
   --meter-warn: #ffd23f;
-  --meter-clip: #ff5a4a;
+  --meter-clip: #ff6b5c;
 
   --playhead: var(--amber-400);
-  --selection-fill: rgb(255 174 61 / 0.22);
-  --grid-bar: rgb(255 255 255 / 0.16);
-  --grid-beat: rgb(255 255 255 / 0.09);
-  --grid-step: rgb(255 255 255 / 0.04);
-  --row-black-key: rgb(0 0 0 / 0.28);
+  --selection-fill: rgb(255 166 74 / 0.22);
+  --grid-bar: rgb(255 255 255 / 0.18);
+  --grid-beat: rgb(255 255 255 / 0.1);
+  --grid-step: rgb(255 255 255 / 0.045);
+  --row-black-key: rgb(0 0 0 / 0.26);
+  --desk: #656c76;
+  --track-a: #34444e;
+  --track-b: #2e3e48;
+  --ruler: #192328;
 
   /* on-screen piano */
-  --key-white: var(--gray-100);
-  --key-white-text: var(--gray-700);
-  --key-black: var(--gray-1000);
-  --key-black-text: var(--gray-200);
+  --key-white: #e9eff2;
+  --key-white-text: #2a373d;
+  --key-black: #10161a;
+  --key-black-text: #dbe3e8;
 
   /* channel colours: each is checked at 3:1 against surfaces, and carries dark text at 4.5:1 */
   --ch-1: #ff7a66;
@@ -187,60 +208,94 @@
   --ch-12: #a9b4cc;
   --text-on-channel: #11141a;
 
-  --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.06);
-  --shadow-modal: 0 24px 64px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.08);
+  /* chrome: the header strips, the numbers display and the carved bevels */
+  --chrome-bar: #596267;
+  --chrome-menu: #5f7374;
+  --chrome-lcd: #536566;
+  --chrome-text: #ffffff;
+  --chrome-hint: #dbe4ea;
+  --well: #3e464b;
+  --well-edge: #242f35;
+  --lcd-pale: #c8d7de;
+  --lcd-pale-ink: #1d262b;
+  --bevel-dark: rgb(1 1 2 / 0.67);
+  --bevel-light: rgb(255 255 255 / 0.14);
+  --glow-inset: rgb(0 0 0 / 0.32);
+  --pill-from: #434c51;
+  --pill-to: rgb(0 0 0 / 0.56);
+
+  /* lit: what is on or active is orange with a glowing rim; LEDs are green */
+  --lit-core: #ffffff;
+  --lit-glow: #f76708;
+  --lit-rim: #f87911;
+  --lit-ink: #501300;
+  --led-on: #5cff5c;
+  --led-off: #646a6d;
+  --record: #ff6b5c;
+
+  /* fader and knob hardware */
+  --cap-top: #f2f1f1;
+  --cap-bottom: #9b9b9b;
+  --knob-face: #4c5356;
+
+  --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(1 1 2 / 0.7);
+  --shadow-modal: 0 24px 64px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(1 1 2 / 0.7);
   --shadow-control: 0 1px 2px rgb(0 0 0 / 0.4);
-  --scrim: rgb(5 7 10 / 0.6);
+  --scrim: rgb(10 14 17 / 0.6);
 }
 
 /* -------------------------------------------------- semantic colours: light */
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --bg: var(--gray-100);
-  --surface-inset: var(--gray-50);
-  --surface-1: var(--gray-0);
-  --surface-2: var(--gray-50);
-  --surface-3: #eceff5;
-  --surface-4: #dfe4ed;
+  --bg: var(--paper-400);
+  --surface-inset: var(--paper-50);
+  --surface-1: var(--paper-100);
+  --surface-2: var(--paper-150);
+  --surface-3: var(--paper-200);
+  --surface-4: var(--paper-250);
 
-  --border-subtle: #dde1ea;
-  --border-strong: #b9c0cf;
-  --border-control: #6a7488;
+  --border-subtle: #aebbc2;
+  --border-strong: #8999a2;
+  --border-control: #4f5f68;
 
-  --text-primary: var(--gray-950);
-  --text-secondary: var(--gray-700);
-  --text-muted: #566075;
-  --text-disabled: #8d96aa;
+  --text-primary: var(--ink-950);
+  --text-secondary: var(--ink-800);
+  --text-muted: var(--ink-600);
+  --text-disabled: #77868e;
 
   --accent: var(--amber-700);
   --accent-hover: var(--amber-800);
-  --accent-pressed: #663500;
-  --accent-contrast: var(--gray-0);
-  --accent-subtle: #fbe7c8;
-  --focus-ring: var(--gray-950);
+  --accent-pressed: #552c00;
+  --accent-contrast: #ffffff;
+  --accent-subtle: #fbe3c4;
+  --focus-ring: var(--ink-950);
 
-  --success: #0b7a52;
-  --warning: #8a6500;
+  --success: #076a28;
+  --warning: #6b4e00;
   --danger: #b3261b;
   --danger-fill: #b3261b;
-  --danger-contrast: var(--gray-0);
+  --danger-contrast: #ffffff;
 
-  --meter-ok: #0b9a69;
-  --meter-warn: #a07200;
+  --meter-ok: #0a8a35;
+  --meter-warn: #9a6e00;
   --meter-clip: #d6301f;
 
   --playhead: var(--amber-700);
-  --selection-fill: rgb(154 82 0 / 0.16);
-  --grid-bar: rgb(0 0 0 / 0.22);
-  --grid-beat: rgb(0 0 0 / 0.12);
-  --grid-step: rgb(0 0 0 / 0.05);
-  --row-black-key: rgb(0 0 0 / 0.06);
+  --selection-fill: rgb(140 74 0 / 0.16);
+  --grid-bar: rgb(0 0 0 / 0.24);
+  --grid-beat: rgb(0 0 0 / 0.13);
+  --grid-step: rgb(0 0 0 / 0.06);
+  --row-black-key: rgb(0 0 0 / 0.07);
+  --desk: #9aa8af;
+  --track-a: #dbe4e8;
+  --track-b: #d1dce1;
+  --ruler: #c7d3d9;
 
-  --key-white: var(--gray-0);
-  --key-white-text: var(--gray-700);
-  --key-black: var(--gray-900);
-  --key-black-text: var(--gray-200);
+  --key-white: #ffffff;
+  --key-white-text: #2a373d;
+  --key-black: #1d262b;
+  --key-black-text: #dbe3e8;
 
   --ch-1: #d03a26;
   --ch-2: #a85f00;
@@ -256,8 +311,35 @@
   --ch-12: #4f5b78;
   --text-on-channel: #ffffff;
 
-  --shadow-popover: 0 8px 24px rgb(15 20 35 / 0.16), 0 0 0 1px rgb(15 20 35 / 0.08);
-  --shadow-modal: 0 24px 64px rgb(15 20 35 / 0.28), 0 0 0 1px rgb(15 20 35 / 0.1);
-  --shadow-control: 0 1px 2px rgb(15 20 35 / 0.12);
-  --scrim: rgb(15 20 35 / 0.45);
+  --chrome-bar: #a8b6bd;
+  --chrome-menu: #b4c4c6;
+  --chrome-lcd: #9fb2b3;
+  --chrome-text: #10181c;
+  --chrome-hint: #26343a;
+  --well: #9aa8af;
+  --well-edge: #7b8b93;
+  --lcd-pale: #c8d7de;
+  --lcd-pale-ink: #1d262b;
+  --bevel-dark: rgb(0 0 0 / 0.34);
+  --bevel-light: rgb(255 255 255 / 0.55);
+  --glow-inset: rgb(0 0 0 / 0.14);
+  --pill-from: #c2ced5;
+  --pill-to: rgb(0 0 0 / 0.22);
+
+  --lit-core: #ffffff;
+  --lit-glow: #f76708;
+  --lit-rim: #f87911;
+  --lit-ink: #501300;
+  --led-on: #0a8a35;
+  --led-off: #8a979d;
+  --record: #d6301f;
+
+  --cap-top: #f7f7f7;
+  --cap-bottom: #a8a8a8;
+  --knob-face: #6f7a80;
+
+  --shadow-popover: 0 8px 24px rgb(15 25 30 / 0.2), 0 0 0 1px rgb(15 25 30 / 0.22);
+  --shadow-modal: 0 24px 64px rgb(15 25 30 / 0.3), 0 0 0 1px rgb(15 25 30 / 0.22);
+  --shadow-control: 0 1px 2px rgb(15 25 30 / 0.16);
+  --scrim: rgb(15 25 30 / 0.45);
 }
