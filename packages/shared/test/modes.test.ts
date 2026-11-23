@@ -24,7 +24,7 @@ test('beginner gets guidance, the starters and the core workshop, not the techni
   const v = ids('beginner');
   for (const id of ['coach-marks', 'guided-builder', 'plain-language', 'vibe-starter', 'keyboard-piano', 'sound-browser']) assert.ok(v.has(id), id);
   // a beginner must be able to make a beat: the step grid, the roll and a simple mixer are always there
-  for (const id of ['channel-rack', 'piano-roll', 'mixer', 'project-files', 'export-wav']) assert.ok(v.has(id), id);
+  for (const id of ['channel-rack', 'piano-roll', 'mixer', 'project-files', 'export-wav', 'transport-previews']) assert.ok(v.has(id), id);
   for (const id of ['playlist', 'step-editor', 'velocity-lane', 'mixer-sends', 'mixer-routing', 'per-note-properties', 'automation-editor']) assert.ok(!v.has(id), id);
 });
 

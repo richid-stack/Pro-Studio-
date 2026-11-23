@@ -4,7 +4,7 @@ import { forceSave, notesOf, openApp, rollGeometry, selectChannel } from './help
 test.describe('files and export', () => {
   test('export writes a real WAV file', async ({ page }) => {
     const app = await openApp(page);
-    await page.getByRole('button', { name: 'File' }).click();
+    await page.getByRole('button', { name: 'File', exact: true }).click();
     await page.getByRole('menuitem', { name: /Export audio/ }).click();
     await expect(page.getByRole('dialog', { name: 'Export audio' })).toBeVisible();
     const download = page.waitForEvent('download', { timeout: 60_000 });
@@ -38,7 +38,7 @@ test.describe('files and export', () => {
 
   test('a starter beat can be loaded from the File menu and undone', async ({ page }) => {
     await openApp(page);
-    await page.getByRole('button', { name: 'File' }).click();
+    await page.getByRole('button', { name: 'File', exact: true }).click();
     await page.getByRole('menuitem', { name: /New drill beat/i }).click();
     await expect(page.getByRole('textbox', { name: 'Project name' })).toHaveValue(/drill/i);
     await page.keyboard.press('Control+z');

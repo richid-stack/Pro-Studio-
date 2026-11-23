@@ -2,19 +2,21 @@
 
 Implements `docs/FRONTEND_ENGINEERING_STANDARD.md` for a dense music-production tool. Source of truth: `packages/ui/src/styles/tokens.css`. If this document and the CSS disagree, the CSS wins and this file is wrong.
 
-## Identity: Graphite & Amber
+## Identity: Slate & Amber
 
-A studio is a dim room where the screen should disappear and the music should stand out. So:
+A studio is a dim room where the screen should disappear and the music should stand out, but a beatmaker also expects the tool to feel like hardware: carved panels, lit buttons, a glass LCD. The look is taken from butterDAWg (see Provenance) and rebuilt on our own tokens.
 
-- **Cool graphite surfaces** in six steps (`--bg`, `--surface-inset`, `--surface-1..4`) separated by thin borders, not shadows.
-- **One accent, amber** (`--accent`), used for the primary action, selection, the playhead and focus-adjacent emphasis. Nothing else is amber.
-- **Colour is reserved for meaning:** 12 channel colours (`--ch-1..12`), meters (`--meter-ok/warn/clip`), status colours. Because chrome is neutral, a channel colour or a clipping meter is instantly legible.
-- **No gradients, glows or glass.** Depth comes from surface steps and borders. Shadows are only for popovers and modals.
-- Dark is the default. A designed light theme exists (`data-theme="light"`): it has its own accent (`--amber-700`), its own channel colours and its own meter colours, not an inversion.
+- **Slate surfaces** (`--bg`, `--surface-inset`, `--surface-1..4`) sit on a mid-grey **desk** (`--desk`). Each panel is a carved frame (`--surface-2`, bevel border) around an inset well (`--surface-1`).
+- **Chrome** is the top bar and its LCDs: `--chrome-bar`, `--chrome-menu`, `--chrome-lcd`, `--chrome-text`, `--chrome-hint`, with `--well`/`--well-edge` for recessed areas and `--bevel-dark`/`--bevel-light` for the 2 px bevel.
+- **One accent, amber** (`--accent`), used for the primary action, selection, the playhead and focus-adjacent emphasis.
+- **Lit buttons.** A pressed toggle (`aria-pressed="true"`) is a lit key: white core (`--lit-core`), orange glow rim (`--lit-glow`, `--lit-rim`), dark ink (`--lit-ink`). State is never colour alone: lit buttons also change shape cue (inset bevel) and expose `aria-pressed`.
+- **Colour is reserved for meaning:** 12 channel colours (`--ch-1..12`), meters (`--meter-ok/warn/clip`), `--led-on`, `--record`, status colours.
+- **Texture is allowed, decoration is not.** Gradients and glows are used only where hardware has them: button caps (`--pill-from/to`), fader caps (`--cap-top/bottom`), knob faces (`--knob-face`), lit buttons and the LCD inset glow (`--glow-inset`). Panels and content areas stay flat. Shadows on popovers and modals, plus the knob and fader caps.
+- Dark is the default. A designed light theme exists (`data-theme="light"`) with its own desk, chrome, accent, channel and meter colours, not an inversion.
 
 ## Tokens (three tiers)
 
-1. **Primitives** (`--gray-*`, `--amber-*`, type scale, `--space-*`, `--radius-*`, durations, z-index). Never used directly in components.
+1. **Primitives** (`--slate-*`, `--paper-*`, `--ink-*`, `--amber-*`, type scale, `--space-*`, `--radius-*`, durations, z-index). Never used directly in components.
 2. **Semantic** (`--bg`, `--surface-*`, `--text-primary|secondary|muted|disabled`, `--accent*`, `--success|warning|danger`, `--border-*`, `--playhead`, `--selection-fill`, `--grid-*`). What components use.
 3. **Component** tokens live beside the component (`button.css` etc.) and are defined from semantic tokens.
 
@@ -27,7 +29,7 @@ Inter for the interface, JetBrains Mono for numbers and technical readouts (`.t-
 ## Space, shape, motion
 
 - 4 px spacing scale (`--space-1..16`).
-- Radii: 2, 4, 6, 10, 14 px and pill. Controls use 4-6, panels 6-10, dialogs 10-14.
+- Radii: 3, 4, 6, 10, 14 px and pill (`--radius-sm` is 3 px, the hardware corner). Controls use 3-6, panels 6-10, dialogs 10-14.
 - Motion: 80 / 120 / 180 / 260 ms, three easings. Used for hover, popovers, panel maximize and drag feedback only. `prefers-reduced-motion` collapses all of it.
 
 ## Density
@@ -44,9 +46,18 @@ Each mode sets a default density (`MODE_DEFAULTS` in `@pro-studio/shared`): Begi
 - 3:1 for control borders, the focus ring, meters, the playhead and every channel colour on the panel surfaces.
 - The light theme must redefine every colour token the dark theme does, so nothing silently inherits a dark value.
 
-Currently 99 pairs per theme pass. Add a pair to the script when you add a token that carries meaning.
+Currently 114 pairs per theme pass (the chrome, lit-button, LED and record pairs came with Slate & Amber). Add a pair to the script when you add a token that carries meaning.
 
 Other rules: one focus style for the whole product (`:focus-visible`, 2 px, `--focus-ring`); no status by colour alone (every meter and state also has a shape, label or position cue); every icon-only control has an accessible name.
+
+## Icons
+
+`apps/web/src/components/Icon.tsx` is our own set, drawn from scratch on a 20 x 20 grid. No third-party icon font or pack.
+
+- **Two tones.** Each icon is layers: `f` fill (full colour), `t` tint (same colour at `--icon-tone-opacity`), `l` line, `m` mark (small detail), `s` soft line. The tint gives the "keycap" depth without a second colour, so icons follow `currentColor` and work in both themes and on lit buttons.
+- **Sizes** are tokens: `--icon-sm` 16 px, `--icon-md` 20 px, `--icon-lg` 24 px. Stroke weights are set per layer so a small icon does not go muddy.
+- **Names** are a closed union (`IconName`); `ICON_NAMES` feeds the contact sheet used to review the set in both themes. Add an icon by drawing it on the grid, adding the name, and checking it on the sheet at all three sizes.
+- Icon-only controls still need an accessible name (the icon is `aria-hidden`).
 
 ## Components (planned in `@pro-studio/ui`, Phase 1)
 
@@ -55,3 +66,7 @@ Button (primary, secondary, ghost, danger, icon, toggle), Knob, Fader, Meter, Sl
 ## Verification
 
 A screen is accepted per the release gate in the standard: screenshots at 390, 768, 1280 and 1920 px reviewed, axe passes, keyboard-only pass, console and network clean. Design intent is never claimed "pixel-perfect" without that evidence.
+
+## Provenance
+
+The colour values, bevel and lit-button treatment, and the overall "hardware panel on a desk" language follow the owner's repository butterDAWg (github.com/richid-stack/butterDAWg, MIT licence). What we took is the design language: tokens and values re-expressed in our own semantic token names and our own CSS. We did not copy its source files, and every icon is drawn here. Do not import from it (see `CLAUDE.md` rule 9). Before a public release, copy its licence and copyright line verbatim into the credits page (Phase 8 audit); this has not been done yet because the licence text was not reachable when this was written.

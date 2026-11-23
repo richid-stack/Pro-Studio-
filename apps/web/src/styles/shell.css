@@ -33,77 +33,6 @@
     font-size: var(--text-sm);
   }
 
-  /* ----------------------------------------------------------------- top bar */
-  .topbar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    min-width: 0;
-    background: var(--surface-1);
-    border-bottom: var(--border-width) solid var(--border-subtle);
-    padding-inline: env(safe-area-inset-left, 0) env(safe-area-inset-right, 0);
-  }
-  .menurow {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    min-height: var(--control-h);
-    padding: var(--space-1) var(--space-3);
-    border-bottom: var(--border-width) solid var(--border-subtle);
-  }
-  .brand {
-    margin-right: var(--space-2);
-    font-size: var(--text-md);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-display);
-    color: var(--accent);
-    white-space: nowrap;
-  }
-  .menubar {
-    display: flex;
-    gap: var(--space-1);
-  }
-  .menu-trigger {
-    min-height: var(--control-h-sm);
-    padding-inline: var(--space-3);
-    background: transparent;
-    border: 0;
-    border-radius: var(--radius-sm);
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-  }
-  .menu-trigger:hover,
-  .menu-trigger[aria-expanded='true'] {
-    background: var(--surface-3);
-    color: var(--text-primary);
-  }
-  .project-name {
-    flex: 1 1 8rem;
-    min-width: 0;
-    max-width: 18rem;
-    min-height: var(--control-h-sm);
-    padding-inline: var(--space-2);
-    background: transparent;
-    border: var(--border-width) solid transparent;
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
-    text-overflow: ellipsis;
-  }
-  .project-name:hover {
-    border-color: var(--border-strong);
-  }
-  .project-name:focus {
-    background: var(--surface-inset);
-    border-color: var(--border-control);
-    color: var(--text-primary);
-  }
-  .menurow-end {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-left: auto;
-  }
-
   .menu-popup {
     position: fixed;
     z-index: var(--z-popover);
@@ -155,28 +84,6 @@
     background: var(--border-subtle);
   }
 
-  /* --------------------------------------------------------------- transport */
-  .transport {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-5);
-    min-height: var(--topbar-h);
-    padding: var(--space-2) var(--space-3);
-  }
-  .transport-group {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-  .transport-end {
-    margin-left: auto;
-  }
-  .transport-field {
-    display: grid;
-    gap: 0;
-    min-width: 0;
-  }
   .field-label {
     font-size: var(--text-xs);
     color: var(--text-muted);
@@ -186,17 +93,6 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-  }
-  .position {
-    min-width: 5.5ch;
-    padding: var(--space-1) var(--space-3);
-    background: var(--surface-inset);
-    border: var(--border-width) solid var(--border-strong);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-mono);
-    font-size: var(--text-md);
-    font-variant-numeric: tabular-nums;
-    text-align: center;
   }
   .number-field {
     width: 6ch;
@@ -232,15 +128,6 @@
     text-align: center;
     font-variant-numeric: tabular-nums;
   }
-  .master-meters {
-    display: flex;
-    gap: var(--space-1);
-  }
-  .master-meters .meter {
-    width: 0.375rem;
-    height: var(--control-h);
-  }
-
   .audio-status {
     display: inline-flex;
     align-items: center;
@@ -269,13 +156,43 @@
 
   /* ---------------------------------------------------------------- controls */
   .icon {
-    width: 1.125rem;
-    height: 1.125rem;
+    width: var(--icon-md);
+    height: var(--icon-md);
     flex: none;
   }
   .icon[data-size='sm'] {
-    width: 0.875rem;
-    height: 0.875rem;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+  }
+  .icon[data-size='lg'] {
+    width: var(--icon-lg);
+    height: var(--icon-lg);
+  }
+  /* two-tone layers (see components/Icon.tsx) */
+  .icon-f {
+    fill: currentColor;
+  }
+  .icon-t {
+    fill: currentColor;
+    fill-opacity: var(--icon-tone-opacity);
+  }
+  .icon-l,
+  .icon-m,
+  .icon-s {
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .icon-l {
+    fill: none;
+  }
+  .icon-m {
+    fill: none;
+    stroke-opacity: var(--icon-tone-opacity);
+  }
+  .icon-s {
+    fill: currentColor;
   }
   .icon-btn {
     display: inline-grid;
@@ -440,27 +357,6 @@
   }
 
   @media (max-width: 47.9375rem) {
-    .brand {
-      display: none;
-    }
-    .menurow {
-      padding-inline: var(--space-2);
-    }
-    /* the mode choice moves into the View menu on a phone */
-    .menurow-end .segmented {
-      display: none;
-    }
-    .transport {
-      gap: var(--space-2) var(--space-4);
-    }
-    /* the audio status may take two lines instead of pushing the page wider */
-    .audio-status {
-      white-space: normal;
-    }
-    .transport-end {
-      min-width: 0;
-      flex-wrap: wrap;
-    }
     .statusbar {
       display: none;
     }

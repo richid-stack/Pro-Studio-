@@ -37,7 +37,9 @@ Not built yet (each is a roadmap line, none is faked in the UI):
 - Browser: packs, recordings, your files; hover waveform preview; key and BPM detection.
 - Mixer insert slots and the Plugins browser tab (they arrive with the Phase 2 effects).
 - Piano roll: resizing from the start edge, ghost notes, scrolling while a drag reaches the edge, recording played notes into the roll, seeking from the ruler with the keyboard.
-- Command palette, floating and tabbed panels.
+- Command palette, tabbed panels.
+- Top-bar controls that are labelled **preview** in the UI (they announce "is a preview and does nothing yet" and carry `data-preview="true"`): PAT / SONG mode, Record, Metronome, Loop, and the pattern selector. They arrive with the engine transport (Phase 2) and the playlist (Phase 3).
+- Floating windows (drag by title bar, resize from any edge, bring to front, pop out and dock back) are in progress: see `docs/WORKSPACE-LAYOUT.md`.
 
 - Exit (verified in Playwright): switching modes changes what is visible without changing the project; play 12 notes from the keyboard with sound; draw, move, resize and delete notes with the mouse; maximize and restore the roll; drag a sample from the browser onto a channel and hear it; reload and find the project intact; axe passes; 4 viewport screenshots reviewed.
 

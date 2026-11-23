@@ -21,23 +21,24 @@
   }
   .knob-track {
     fill: none;
-    stroke: var(--border-strong);
+    stroke: var(--well-edge);
     stroke-width: 3;
     stroke-linecap: round;
   }
   .knob-value {
     fill: none;
-    stroke: var(--knob-color, var(--accent));
+    stroke: var(--knob-color, var(--led-on));
     stroke-width: 3;
     stroke-linecap: round;
   }
   .knob-cap {
-    fill: var(--surface-3);
-    stroke: var(--border-control);
+    fill: var(--knob-face);
+    stroke: var(--bevel-dark);
     stroke-width: 1;
+    filter: drop-shadow(0 1px 1px var(--bevel-dark));
   }
   .knob-tick {
-    stroke: var(--text-primary);
+    stroke: var(--chrome-text);
     stroke-width: 2;
     stroke-linecap: round;
   }
@@ -61,8 +62,8 @@
     width: 0.375rem;
     height: 100%;
     margin-inline: auto;
-    background: var(--surface-inset);
-    border: var(--border-width) solid var(--border-strong);
+    background: var(--well-edge);
+    border: var(--border-width) solid var(--bevel-dark);
     border-radius: var(--radius-pill);
   }
   .fader-fill {
@@ -88,10 +89,10 @@
     width: 1.5rem;
     height: 0.75rem;
     transform: translate(-50%, 50%);
-    background: var(--surface-4);
-    border: var(--border-width) solid var(--border-control);
+    background: linear-gradient(var(--cap-top), var(--cap-bottom));
+    border: var(--border-width) solid var(--bevel-dark);
     border-radius: var(--radius-xs);
-    box-shadow: var(--shadow-control);
+    box-shadow: inset 0 1px 0 var(--bevel-light), var(--shadow-control);
   }
   .fader-cap::after {
     content: '';
@@ -103,7 +104,7 @@
     background: var(--fader-color, var(--accent));
   }
   .fader:hover .fader-cap {
-    background: var(--surface-3);
+    filter: brightness(1.06);
   }
 
   /* The lit part is a fixed scale from green to red. A cover hides everything above the current level. */
@@ -119,8 +120,17 @@
   .meter-cover {
     position: absolute;
     inset: 0;
-    background: var(--surface-inset);
+    background: var(--well);
     transform-origin: top;
     transform: scaleY(1);
+  }
+  /* the same meter lying down, for the top bar: it empties from the right */
+  .meter[data-orientation='horizontal'] {
+    width: auto;
+    background: linear-gradient(to right, var(--meter-ok) 0 62%, var(--meter-warn) 62% 88%, var(--meter-clip) 88% 100%);
+  }
+  .meter[data-orientation='horizontal'] .meter-cover {
+    transform-origin: right;
+    transform: scaleX(1);
   }
 }

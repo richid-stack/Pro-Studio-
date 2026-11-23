@@ -1,0 +1,508 @@
+/*
+ * The top bar: two rows of carved panels on a slate strip, in butterDAWg's design language (see
+ * docs/DESIGN-SYSTEM.md, "Provenance"). Row one is menus, transport, numbers and files; row two is the project,
+ * its knobs, key and scale, the panel toggles and status. Tokens only; component sizes derive from --tb-h.
+ */
+@layer components {
+  .topbar {
+    --tb-h: calc(var(--control-h-lg) + var(--space-1));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+    background: var(--chrome-bar);
+    border-bottom: var(--border-width) solid var(--bevel-dark);
+    box-shadow: inset 0 1px 0 var(--bevel-light);
+    padding-inline: env(safe-area-inset-left, 0) env(safe-area-inset-right, 0);
+  }
+  .tb-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    min-height: calc(var(--tb-h) + var(--space-2));
+    padding: var(--space-1) var(--space-2);
+  }
+  .tb-row + .tb-row {
+    border-top: var(--border-width) solid var(--bevel-dark);
+    box-shadow: inset 0 1px 0 var(--bevel-light);
+  }
+
+  /* a dark grip sits in the gap in front of every panel, like the handle on a hardware rack */
+  .tb-row > :not(:first-child, .tb-end) {
+    position: relative;
+  }
+  .tb-row > :not(:first-child, .tb-end)::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    bottom: 20%;
+    left: calc(var(--space-2) * -0.75);
+    width: 0.1875rem;
+    border-radius: var(--radius-pill);
+    background: var(--well-edge);
+    box-shadow: 1px 0 0 var(--bevel-light);
+  }
+
+  /* ----------------------------------------------------------------- menus */
+  .tb-menus {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: var(--tb-h);
+    padding-inline: var(--space-2);
+    background: var(--chrome-menu);
+    border: var(--border-width) solid var(--bevel-dark);
+    border-radius: var(--radius-xs);
+    box-shadow: inset 0 1px 0 var(--bevel-light);
+  }
+  .brand {
+    margin-right: var(--space-1);
+    color: var(--chrome-text);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    white-space: nowrap;
+  }
+  .menubar {
+    display: flex;
+    gap: 0;
+  }
+  .menu-trigger {
+    min-height: var(--control-h-sm);
+    padding-inline: var(--space-2);
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-xs);
+    color: var(--chrome-text);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+  }
+  .menu-trigger:hover {
+    background: var(--bevel-light);
+  }
+  .menu-trigger[aria-expanded='true'] {
+    background: var(--bevel-dark);
+  }
+
+  /* ------------------------------------------------------------ groups, buttons */
+  .tb-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+  .tb-btn {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--tb-h);
+    height: var(--tb-h);
+    padding: 0;
+    background: var(--surface-4);
+    border: 2px solid var(--bevel-dark);
+    border-radius: var(--radius-sm);
+    box-shadow: inset 0 0 0.625rem var(--glow-inset);
+    color: var(--text-secondary);
+    transition: border-color var(--duration-base) var(--ease-standard), background var(--duration-base) var(--ease-standard), box-shadow var(--duration-base) var(--ease-standard), color var(--duration-base) var(--ease-standard);
+  }
+  .tb-btn:hover:not(:disabled) {
+    border-color: var(--lit-rim);
+    color: var(--text-primary);
+  }
+  .tb-btn:disabled {
+    color: var(--text-disabled);
+  }
+  /* lit: the face turns white, the rim glows orange and the icon goes dark */
+  .tb-btn[aria-pressed='true'],
+  .tb-play[aria-pressed='true'],
+  .tb-mode [data-lit='pat'] {
+    background: var(--lit-core);
+    border-color: var(--lit-rim);
+    box-shadow: inset 0 0 0.9rem var(--lit-glow);
+    color: var(--lit-ink);
+  }
+  .tb-btn[data-preview],
+  .tb-pattern button {
+    position: relative;
+  }
+
+  /* ------------------------------------------------------------ transport pill */
+  .tb-pill {
+    display: flex;
+    height: var(--tb-h);
+  }
+  .tb-pill > * {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: linear-gradient(0deg, var(--pill-to), var(--pill-from));
+    border: 0;
+    box-shadow: inset 0 0 0 1px var(--bevel-dark);
+    color: var(--text-secondary);
+  }
+  .tb-mode {
+    place-items: stretch;
+    grid-template-rows: 1fr 1fr;
+    width: 2.75rem;
+    overflow: hidden;
+    border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+  }
+  .tb-mode button {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    line-height: 1;
+  }
+  .tb-mode button:hover {
+    color: var(--text-primary);
+  }
+  .tb-mode [data-lit='song'] {
+    background: var(--lit-core);
+    box-shadow: inset 0 0 0.7rem var(--led-on);
+    color: var(--lcd-pale-ink);
+  }
+  .tb-mode [data-lit='pat'] {
+    box-shadow: inset 0 0 0.7rem var(--lit-glow);
+  }
+  .tb-play {
+    width: var(--tb-h);
+    border-radius: 0;
+  }
+  .tb-stop {
+    width: calc(var(--tb-h) + var(--space-1));
+    border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  }
+  .tb-play:hover,
+  .tb-stop:hover {
+    color: var(--text-primary);
+  }
+  .tb-play[aria-pressed='true'] {
+    border-radius: 0;
+    box-shadow: inset 0 0 0.9rem var(--lit-glow);
+  }
+
+  .tb-record {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: calc(var(--tb-h) - var(--space-1));
+    height: calc(var(--tb-h) - var(--space-1));
+    padding: 0;
+    background: var(--surface-3);
+    border: 2px solid var(--bevel-dark);
+    border-radius: var(--radius-pill);
+    box-shadow: inset 0 0 0.625rem var(--glow-inset);
+  }
+  .tb-record span {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: var(--radius-pill);
+    background: var(--record);
+  }
+  .tb-record:hover span,
+  .tb-record[aria-pressed='true'] span {
+    box-shadow: 0 0 0.5rem var(--record);
+  }
+  .tb-record[aria-pressed='true'] {
+    border-color: var(--record);
+  }
+
+  /* --------------------------------------------------------------- the displays */
+  .lcd {
+    position: relative;
+    display: flex;
+    flex: none;
+    align-items: center;
+    height: var(--tb-h);
+    min-width: 0;
+  }
+  .lcd-cap {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-label);
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .lcd:has(:focus-visible) {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .lcd :focus-visible {
+    outline: none;
+  }
+
+  /* tempo: the pale LCD, dark digits */
+  .lcd-tempo {
+    gap: var(--space-1);
+    padding-inline: var(--space-3) var(--space-2);
+    background: var(--lcd-pale);
+    border-radius: var(--radius-lg);
+    box-shadow: inset 0 0 0 1px var(--bevel-dark), inset 0 2px 0.1875rem var(--glow-inset);
+    color: var(--lcd-pale-ink);
+  }
+  .lcd-input {
+    width: 7ch;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    font-family: var(--font-mono);
+    font-size: var(--text-xl);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-display);
+    text-align: right;
+  }
+  .lcd-tempo .lcd-cap {
+    align-self: flex-end;
+    padding-bottom: var(--space-1);
+  }
+
+  /* position: the dark LCD, white digits */
+  .lcd-time {
+    justify-content: center;
+    gap: var(--space-2);
+    min-width: 8.5rem;
+    padding-inline: var(--space-3) var(--space-2);
+    background: var(--chrome-lcd);
+    border: var(--border-width) solid var(--bevel-dark);
+    border-radius: var(--radius-xs);
+    box-shadow: inset 0 0 0.5rem var(--glow-inset);
+    color: var(--chrome-text);
+  }
+  .lcd-time .position {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xl);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-display);
+  }
+  .lcd-time .lcd-cap {
+    align-self: flex-start;
+    margin-top: var(--space-1);
+    color: var(--chrome-hint);
+  }
+
+  /* the master level: two thin bars in a well */
+  .tb-scope {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: var(--space-1);
+    width: 6rem;
+    height: var(--tb-h);
+    padding: var(--space-1) var(--space-2);
+    background: var(--well);
+    border: var(--border-width) solid var(--well-edge);
+    border-radius: var(--radius-xs);
+    box-shadow: inset 0 0 0.5rem var(--glow-inset);
+  }
+
+  /* --------------------------------------------------------------------- row two */
+  .tb-field {
+    flex: 0 1 12rem;
+    min-width: 6rem;
+    height: calc(var(--tb-h) - var(--space-1));
+    padding-inline: var(--space-2);
+    background: var(--surface-3);
+    border: var(--border-width) solid var(--border-control);
+    border-radius: var(--radius-xs);
+    box-shadow: inset 0 0 0.5rem var(--glow-inset);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    text-overflow: ellipsis;
+  }
+  .tb-field:focus {
+    background: var(--surface-inset);
+  }
+  .tb-knobs {
+    gap: var(--space-3);
+  }
+  .tb-knob {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+  .tb-knob .field-label {
+    color: var(--chrome-hint);
+  }
+  .tb-knob .readout-sm {
+    min-width: 3ch;
+    color: var(--chrome-text);
+  }
+  .tb-tonal {
+    gap: var(--space-3);
+  }
+  .tb-select {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+  .tb-select .field-label {
+    color: var(--chrome-hint);
+  }
+  .topbar .select {
+    height: calc(var(--tb-h) - var(--space-1));
+    background: var(--surface-inset);
+    border: var(--border-width) solid var(--border-control);
+    border-radius: var(--radius-xs);
+    box-shadow: inset 0 0 0.5rem var(--glow-inset);
+    color: var(--text-primary);
+  }
+
+  .tb-pattern {
+    display: flex;
+    align-items: center;
+    height: calc(var(--tb-h) - var(--space-1));
+    background: var(--lcd-pale);
+    border: var(--border-width) solid var(--bevel-dark);
+    border-radius: var(--radius-xs);
+    color: var(--lcd-pale-ink);
+  }
+  .tb-pattern button {
+    display: grid;
+    place-items: center;
+    align-self: stretch;
+    padding: 0 var(--space-1);
+    background: transparent;
+    border: 0;
+    color: var(--lcd-pale-ink);
+  }
+  .tb-pattern button:hover {
+    background: var(--bevel-light);
+  }
+  .tb-pattern-name {
+    min-width: 6.5rem;
+    padding-inline: var(--space-2);
+    font-size: var(--text-md);
+    white-space: nowrap;
+  }
+
+  .tb-windows {
+    gap: var(--space-1);
+  }
+  .tb-end {
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    min-width: 0;
+    margin-left: auto;
+  }
+  .tb-panel {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    height: calc(var(--tb-h) - var(--space-1));
+    padding-inline: var(--space-2);
+    background: var(--well);
+    border: var(--border-width) solid var(--well-edge);
+    border-radius: var(--radius-xs);
+    box-shadow: inset 0 0 0.5rem var(--glow-inset);
+    color: var(--text-secondary);
+  }
+  .tb-panel .audio-status {
+    min-width: 0;
+  }
+  .audio-status-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .topbar .segmented {
+    background: var(--surface-inset);
+    border-color: var(--bevel-dark);
+  }
+
+  .menu-popup {
+    background: var(--surface-1);
+    border-color: var(--border-strong);
+  }
+
+  /* ------------------------------------------------------------ narrower screens */
+  /* below 1280px a row that does not fit wraps onto a second line instead of squeezing the displays */
+  @media (max-width: 79.9375rem) {
+    .tb-row {
+      flex-wrap: wrap;
+    }
+    .tb-menus,
+    .tb-pill,
+    .tb-group {
+      flex: none;
+    }
+    .tb-end {
+      flex: 1 1 auto;
+    }
+  }
+  /* below about 1400px the bar keeps what it can use and drops what repeats elsewhere */
+  @media (max-width: 87.9375rem) {
+    .brand,
+    .tb-pattern,
+    .tb-knob .readout-sm {
+      display: none;
+    }
+    /* the status keeps its dot and its words stay available to screen readers */
+    .tb-panel .audio-status-text {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+  @media (max-width: 67.9375rem) {
+    .tb-scope,
+    .tb-files,
+    .tb-pattern {
+      display: none;
+    }
+  }
+  @media (max-width: 47.9375rem) {
+    .tb-row {
+      flex-wrap: wrap;
+    }
+    .tb-windows,
+    .tb-preview,
+    .tb-record,
+    .tb-mode,
+    .tb-end .segmented,
+    .lcd-time .lcd-cap {
+      display: none;
+    }
+    .tb-play {
+      border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+    }
+    .tb-end {
+      margin-left: 0;
+    }
+    /* the numbers share one line with the transport */
+    .tb-row {
+      gap: var(--space-1) var(--space-2);
+    }
+    .lcd-tempo .lcd-cap {
+      display: none;
+    }
+    .lcd-tempo {
+      padding-inline: var(--space-2);
+    }
+    .lcd-input {
+      width: 6.5ch;
+      font-size: var(--text-lg);
+    }
+    .lcd-time {
+      min-width: 0;
+      padding-inline: var(--space-2);
+    }
+    .lcd-time .position {
+      font-size: var(--text-xl);
+    }
+    .tb-menus {
+      flex: 1 1 auto;
+    }
+  }
+}

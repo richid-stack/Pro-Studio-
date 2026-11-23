@@ -81,6 +81,8 @@ export const FEATURES: readonly FeatureDef[] = [
   { id: 'project-files', label: 'New, open, save and starter beats', kind: 'tool' },
   { id: 'export-wav', label: 'Export to WAV', kind: 'tool' },
   { id: 'roll-scale-rows', label: 'Key and scale shown in the piano roll', kind: 'tool' },
+  // Prototype: PAT/SONG, record, metronome, loop and the pattern selector. Labelled "preview" in the UI until the transport and playlist exist.
+  { id: 'transport-previews', label: 'Transport previews (pattern/song, record, metronome, loop; no effect yet)', kind: 'tool' },
 
   // Standard: the full workspace.
   { id: 'playlist', label: 'Playlist', kind: 'tool', from: 'standard' },
