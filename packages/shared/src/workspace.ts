@@ -16,6 +16,14 @@ export const PANEL_LABELS: Readonly<Record<PanelId, string>> = {
   mixer: 'Mixer',
 };
 
+/** A window's place inside the workspace box, in px from its top-left corner. */
+export interface WindowRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 export interface WorkspaceLayout {
   /** Width of the browser column, px. */
   browserW: number;
@@ -27,15 +35,21 @@ export interface WorkspaceLayout {
   mixerH: number;
   hidden: readonly PanelId[];
   maximized: PanelId | null;
+  /** Panels that float above the docked layout, each with its own rect. A floating panel takes no docked space. */
+  floating: Readonly<Partial<Record<PanelId, WindowRect>>>;
+  /** Floating panels from back to front: the last one is on top. */
+  stack: readonly PanelId[];
+  /** Floating panels collapsed to their title bar. */
+  folded: readonly PanelId[];
 }
 
 export type LayoutPresetId = 'beat' | 'arrange' | 'mix' | 'perform';
 
 export const LAYOUT_PRESETS: Readonly<Record<LayoutPresetId, { label: string; layout: WorkspaceLayout }>> = {
-  beat: { label: 'Beat', layout: { browserW: 232, rackW: 600, topH: 208, mixerH: 196, hidden: [], maximized: null } },
-  arrange: { label: 'Arrange', layout: { browserW: 200, rackW: 400, topH: 420, mixerH: 150, hidden: [], maximized: null } },
-  mix: { label: 'Mix', layout: { browserW: 200, rackW: 360, topH: 190, mixerH: 400, hidden: [], maximized: null } },
-  perform: { label: 'Perform', layout: { browserW: 232, rackW: 600, topH: 150, mixerH: 150, hidden: ['playlist'], maximized: null } },
+  beat: { label: 'Beat', layout: { browserW: 232, rackW: 600, topH: 208, mixerH: 196, hidden: [], maximized: null, floating: {}, stack: [], folded: [] } },
+  arrange: { label: 'Arrange', layout: { browserW: 200, rackW: 400, topH: 420, mixerH: 150, hidden: [], maximized: null, floating: {}, stack: [], folded: [] } },
+  mix: { label: 'Mix', layout: { browserW: 200, rackW: 360, topH: 190, mixerH: 400, hidden: [], maximized: null, floating: {}, stack: [], folded: [] } },
+  perform: { label: 'Perform', layout: { browserW: 232, rackW: 600, topH: 150, mixerH: 150, hidden: ['playlist'], maximized: null, floating: {}, stack: [], folded: [] } },
 };
 
 export const MIN_BROWSER_W = 160;

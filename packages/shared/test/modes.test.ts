@@ -25,12 +25,12 @@ test('beginner gets guidance, the starters and the core workshop, not the techni
   for (const id of ['coach-marks', 'guided-builder', 'plain-language', 'vibe-starter', 'keyboard-piano', 'sound-browser']) assert.ok(v.has(id), id);
   // a beginner must be able to make a beat: the step grid, the roll and a simple mixer are always there
   for (const id of ['channel-rack', 'piano-roll', 'mixer', 'project-files', 'export-wav', 'transport-previews']) assert.ok(v.has(id), id);
-  for (const id of ['playlist', 'step-editor', 'velocity-lane', 'mixer-sends', 'mixer-routing', 'per-note-properties', 'automation-editor']) assert.ok(!v.has(id), id);
+  for (const id of ['playlist', 'step-editor', 'velocity-lane', 'mixer-sends', 'mixer-routing', 'per-note-properties', 'automation-editor', 'floating-windows']) assert.ok(!v.has(id), id);
 });
 
 test('standard has the full workspace and drops beginner-only scaffolding', () => {
   const v = ids('standard');
-  for (const id of ['channel-rack', 'piano-roll', 'playlist', 'mixer', 'chord-brain', 'explain-suggestions', 'safety-rails']) assert.ok(v.has(id), id);
+  for (const id of ['channel-rack', 'piano-roll', 'playlist', 'mixer', 'chord-brain', 'explain-suggestions', 'safety-rails', 'floating-windows']) assert.ok(v.has(id), id);
   for (const id of ['coach-marks', 'guided-builder', 'plain-language', 'mixer-routing', 'tempo-map']) assert.ok(!v.has(id), id);
 });
 

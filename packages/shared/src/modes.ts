@@ -92,6 +92,7 @@ export const FEATURES: readonly FeatureDef[] = [
   { id: 'chord-brain', label: 'Chord brain', kind: 'tool', from: 'standard' },
   { id: 'hihat-designer', label: 'Hi-hat designer', kind: 'tool', from: 'standard' },
   { id: 'dock-layouts', label: 'Dockable, maximizable panels', kind: 'tool', from: 'standard' },
+  { id: 'floating-windows', label: 'Floating windows: drag, resize, stack, pop out and dock', kind: 'tool', from: 'standard' },
   { id: 'browser-tags', label: 'Tag filters in the browser', kind: 'tool', from: 'standard' },
 
   // Pro: the technical depth.
