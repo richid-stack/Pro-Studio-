@@ -1,56 +1,264 @@
-/** Small line icons, drawn for Pro Studio. They are decoration: the control that holds one carries the accessible name. */
+/**
+ * Pro Studio's icons. Every glyph is drawn here, on a 20-unit grid with a 2-unit safe margin.
+ *
+ * The house style is two-tone: a solid shape carries the meaning and a quieter tone shape (the same colour at
+ * `--icon-tone-opacity`) gives it body, so an icon reads at 16px and still looks designed at 24px. Corners are
+ * rounded, strokes are 1.75 wide with round caps, and any glyph that is "a thing" (a pad, a fader, a folder)
+ * is filled; any glyph that is "an action" (undo, close, chevron) is a line.
+ *
+ * Layers, painted in order:
+ *   f  solid fill            t  tone fill            l  line            m  tone line
+ *   s  solid fill with a round-joined stroke (soft-cornered solid shapes: play, stop, pause)
+ *
+ * Icons are decoration: the control that holds one carries the accessible name.
+ */
 export type IconName =
   | 'play' | 'pause' | 'stop' | 'undo' | 'redo' | 'plus' | 'minus' | 'close' | 'maximize' | 'restore' | 'chevron' | 'check'
   | 'search' | 'speaker' | 'more' | 'keys' | 'draw' | 'select' | 'erase' | 'pan' | 'sun' | 'moon' | 'zoom-time' | 'zoom-pitch'
-  | 'folder' | 'folder-open' | 'project' | 'drum' | 'wave' | 'note' | 'beat' | 'star' | 'star-fill' | 'collapse';
+  | 'folder' | 'folder-open' | 'project' | 'drum' | 'wave' | 'note' | 'beat' | 'star' | 'star-fill' | 'collapse'
+  | 'save' | 'export' | 'help' | 'metronome' | 'loop' | 'record' | 'caret' | 'window-browser' | 'window-rack' | 'window-roll' | 'window-playlist' | 'window-mixer';
 
-interface Glyph {
+type Kind = 'f' | 't' | 'l' | 'm' | 's';
+
+interface Layer {
   d: string;
-  fill?: boolean;
+  k: Kind;
+  /** Stroke width for l, m and s layers. Defaults come from the stylesheet. */
+  w?: number;
 }
 
+interface Glyph {
+  layers: Layer[];
+  /** Draw the glyph flipped left to right (redo is undo, mirrored). */
+  mirror?: boolean;
+}
+
+/* ----------------------------------------------------------------- path helpers */
+
+const n = (v: number) => String(Math.round(v * 100) / 100);
+
+/** A rounded rectangle. */
+const rr = (x: number, y: number, w: number, h: number, r = 0.8) =>
+  `M${n(x + r)} ${n(y)}h${n(w - 2 * r)}a${r} ${r} 0 0 1 ${r} ${r}v${n(h - 2 * r)}a${r} ${r} 0 0 1-${r} ${r}h${n(-(w - 2 * r))}a${r} ${r} 0 0 1-${r}-${r}v${n(-(h - 2 * r))}a${r} ${r} 0 0 1 ${r}-${r}z`;
+
+/** A circle. */
+const dot = (cx: number, cy: number, r: number) => `M${n(cx - r)} ${n(cy)}a${r} ${r} 0 1 0 ${n(2 * r)} 0a${r} ${r} 0 1 0 ${n(-2 * r)} 0z`;
+
+/** A grid of small rounded squares: the cells in `lit` are solid, the rest are tone. */
+function cells(cols: number, rows: number, x0: number, y0: number, size: number, gap: number, lit: ReadonlyArray<readonly [number, number]>): Layer[] {
+  const on: string[] = [];
+  const off: string[] = [];
+  for (let r = 0; r < rows; r += 1) {
+    for (let c = 0; c < cols; c += 1) {
+      const d = rr(x0 + c * (size + gap), y0 + r * (size + gap), size, size, 0.7);
+      (lit.some(([lc, lr]) => lc === c && lr === r) ? on : off).push(d);
+    }
+  }
+  return [{ d: off.join(''), k: 't' }, { d: on.join(''), k: 'f' }];
+}
+
+const STAR = 'M10 3.2L11.82 7.89L16.85 8.18L12.95 11.36L14.23 16.22L10 13.5L5.77 16.22L7.05 11.36L3.15 8.18L8.18 7.89z';
+
 const GLYPHS: Record<IconName, Glyph> = {
-  play: { d: 'M8 5.5v13l11-6.5z', fill: true },
-  pause: { d: 'M7 5h3.5v14H7zM13.5 5H17v14h-3.5z', fill: true },
-  stop: { d: 'M6.5 6.5h11v11h-11z', fill: true },
-  undo: { d: 'M9 14 4 9l5-5M4 9h9.5a5.5 5.5 0 0 1 0 11H10' },
-  redo: { d: 'm15 14 5-5-5-5M20 9h-9.5a5.5 5.5 0 0 0 0 11H14' },
-  plus: { d: 'M12 5v14M5 12h14' },
-  minus: { d: 'M5 12h14' },
-  close: { d: 'm6 6 12 12M18 6 6 18' },
-  maximize: { d: 'M4.5 9V4.5H9M19.5 9V4.5H15M4.5 15v4.5H9M19.5 15v4.5H15' },
-  restore: { d: 'M9 4.5V9H4.5M15 4.5V9h4.5M9 19.5V15H4.5M15 19.5V15h4.5' },
-  chevron: { d: 'm6 9 6 6 6-6' },
-  check: { d: 'm5 12.5 4.5 4.5L19 7' },
-  search: { d: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13ZM20 20l-4.8-4.8' },
-  speaker: { d: 'M4.5 9.5v5h3.5l5 4v-13l-5 4zM16.5 9a4.2 4.2 0 0 1 0 6' },
-  more: { d: 'M6 12h.01M12 12h.01M18 12h.01' },
-  keys: { d: 'M3.5 6h17v12h-17zM8 6v12M12 6v12M16 6v12' },
-  draw: { d: 'm4.5 19.5 1-4L16 5a2 2 0 0 1 3 3L8.5 18.5z' },
-  select: { d: 'M5 5h5M14 5h5M5 19h5M14 19h5M5 5v5M5 14v5M19 5v5M19 14v5' },
-  erase: { d: 'm9 19-4.5-4.5a2 2 0 0 1 0-3L12 4l7 7-7.5 7.5zM9 19h9' },
-  pan: { d: 'M12 3.5v17M3.5 12h17M9 6.5 12 3.5l3 3M9 17.5l3 3 3-3M6.5 9 3.5 12l3 3M17.5 9l3 3-3 3' },
-  sun: { d: 'M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4' },
-  moon: { d: 'M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10Z' },
-  'zoom-time': { d: 'M4 12h16M7 8.5 4 12l3 3.5M17 8.5l3 3.5-3 3.5' },
-  'zoom-pitch': { d: 'M12 4v16M8.5 7 12 4l3.5 3M8.5 17 12 20l3.5-3' },
-  folder: { d: 'M3.5 7a1.5 1.5 0 0 1 1.5-1.5h4l2 2.5h8a1.5 1.5 0 0 1 1.5 1.5v7.5a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 17z' },
-  'folder-open': { d: 'M3.5 17V7A1.5 1.5 0 0 1 5 5.5h4l2 2.5h6.5A1.5 1.5 0 0 1 19 9.5v1.5M3.5 17.5l2.2-5.8a1.5 1.5 0 0 1 1.4-1h13.1a1 1 0 0 1 .94 1.35L19.1 17a1.5 1.5 0 0 1-1.4 1H5a1.5 1.5 0 0 1-1.5-.5Z' },
-  project: { d: 'M6.5 3.5h7l4 4v13h-11zM13.5 3.5v4h4M9.5 12h5M9.5 15.5h5' },
-  drum: { d: 'M6.5 4.5h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2ZM12 9.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z' },
-  wave: { d: 'M3 12c1.6-6 3.4-6 4.5 0s2.9 6 4.5 0 2.9-6 4.5 0 2.2 4.5 4.5 3' },
-  note: { d: 'M9 17.5V6l10-2v11.5M9 17.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM19 15.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z' },
-  beat: { d: 'M4 6h3.5v3.5H4zM10.25 6h3.5v3.5h-3.5zM16.5 6H20v3.5h-3.5zM4 14.5h3.5V18H4zM10.25 14.5h3.5V18h-3.5zM16.5 14.5H20V18h-3.5z' },
-  star: { d: 'm12 3.8 2.5 5.1 5.6.8-4.05 3.95.95 5.6L12 16.6l-5 2.65.95-5.6L3.9 9.7l5.6-.8z' },
-  'star-fill': { d: 'm12 3.8 2.5 5.1 5.6.8-4.05 3.95.95 5.6L12 16.6l-5 2.65.95-5.6L3.9 9.7l5.6-.8z', fill: true },
-  collapse: { d: 'm7 11 5-5 5 5M7 18l5-5 5 5' },
+  /* transport */
+  play: { layers: [{ d: 'M7 4.8v10.4L15.2 10z', k: 's', w: 2 }] },
+  pause: { layers: [{ d: 'M5.8 5h2.4v10H5.8zM11.8 5h2.4v10h-2.4z', k: 's', w: 1.8 }] },
+  stop: { layers: [{ d: 'M5.6 5.6h8.8v8.8H5.6z', k: 's', w: 2 }] },
+  undo: { layers: [{ d: 'M7.5 4 3.8 7.7l3.7 3.7', k: 'l' }, { d: 'M4 7.7h7.6a4.5 4.5 0 0 1 0 9H8', k: 'l' }] },
+  redo: { layers: [{ d: 'M7.5 4 3.8 7.7l3.7 3.7', k: 'l' }, { d: 'M4 7.7h7.6a4.5 4.5 0 0 1 0 9H8', k: 'l' }], mirror: true },
+
+  /* actions */
+  plus: { layers: [{ d: 'M10 4.5v11M4.5 10h11', k: 'l' }] },
+  minus: { layers: [{ d: 'M4.5 10h11', k: 'l' }] },
+  close: { layers: [{ d: 'M5.2 5.2l9.6 9.6M14.8 5.2l-9.6 9.6', k: 'l' }] },
+  maximize: { layers: [{ d: 'M3.8 7.8V4.8a1 1 0 0 1 1-1h3M16.2 7.8V4.8a1 1 0 0 0-1-1h-3M3.8 12.2v3a1 1 0 0 0 1 1h3M16.2 12.2v3a1 1 0 0 1-1 1h-3', k: 'l' }] },
+  restore: { layers: [{ d: 'M7.8 3.8v3a1 1 0 0 1-1 1h-3M12.2 3.8v3a1 1 0 0 0 1 1h3M7.8 16.2v-3a1 1 0 0 0-1-1h-3M12.2 16.2v-3a1 1 0 0 1 1-1h3', k: 'l' }] },
+  chevron: { layers: [{ d: 'M5.5 8l4.5 4.5L14.5 8', k: 'l' }] },
+  collapse: { layers: [{ d: 'M5.5 9.2L10 4.7l4.5 4.5', k: 'l' }, { d: 'M5.5 15.2l4.5-4.5 4.5 4.5', k: 'm' }] },
+  check: { layers: [{ d: 'M4.5 10.5l3.6 3.6 7.4-8.2', k: 'l' }] },
+  search: { layers: [{ d: dot(8.6, 8.6, 5.2), k: 't' }, { d: dot(8.6, 8.6, 5.2), k: 'l' }, { d: 'M12.5 12.5l4 4', k: 'l', w: 2.2 }] },
+  more: { layers: [{ d: dot(4.5, 10, 1.5) + dot(10, 10, 1.5) + dot(15.5, 10, 1.5), k: 'f' }] },
+  speaker: {
+    layers: [
+      { d: 'M3 7.8h2.8l4.3-3.5a.5.5 0 0 1 .8.4v10.6a.5.5 0 0 1-.8.4l-4.3-3.5H3z', k: 's', w: 1 },
+      { d: 'M13.4 7.6a3.5 3.5 0 0 1 0 4.8', k: 'l' },
+      { d: 'M15.6 5.4a6.6 6.6 0 0 1 0 9.2', k: 'm' },
+    ],
+  },
+
+  /* piano roll tools */
+  draw: {
+    layers: [
+      { d: 'M3.6 16.4l.9-3.7 8.4-8.4a1.6 1.6 0 0 1 2.3 0l.5.5a1.6 1.6 0 0 1 0 2.3l-8.4 8.4z', k: 't' },
+      { d: 'M3.6 16.4l.9-3.7 8.4-8.4a1.6 1.6 0 0 1 2.3 0l.5.5a1.6 1.6 0 0 1 0 2.3l-8.4 8.4z', k: 'l', w: 1.5 },
+      { d: 'M11.4 5.8l2.8 2.8', k: 'l', w: 1.5 },
+      { d: 'M3.6 16.4l.9-3.7 2.8 2.8z', k: 'f' },
+    ],
+  },
+  select: {
+    layers: [
+      { d: rr(7, 7, 6, 6, 0.8), k: 'f' },
+      { d: 'M3.8 7.2V5a1.2 1.2 0 0 1 1.2-1.2h2.2M12.8 3.8H15a1.2 1.2 0 0 1 1.2 1.2v2.2M16.2 12.8V15a1.2 1.2 0 0 1-1.2 1.2h-2.2M7.2 16.2H5A1.2 1.2 0 0 1 3.8 15v-2.2', k: 'l' },
+    ],
+  },
+  erase: {
+    layers: [
+      { d: 'M3.8 11.9 11 4.7a1.5 1.5 0 0 1 2.1 0l2.9 2.9a1.5 1.5 0 0 1 0 2.1l-7 7H6.4z', k: 't' },
+      { d: 'M3.8 11.9 11 4.7a1.5 1.5 0 0 1 2.1 0l2.9 2.9a1.5 1.5 0 0 1 0 2.1l-7 7H6.4z', k: 'l', w: 1.5 },
+      { d: 'M3.8 11.9 8.6 16.7H6.4l-2.6-2.6z', k: 'f' },
+      { d: 'M9.2 7.4l5 5', k: 'l', w: 1.5 },
+      { d: 'M10.6 16.7h5.6', k: 'l', w: 1.5 },
+    ],
+  },
+  pan: {
+    layers: [
+      { d: 'M10 5.5v9M5.5 10h9', k: 'l' },
+      { d: 'M10 2.4l2.7 3.1H7.3zM10 17.6l2.7-3.1H7.3zM2.4 10l3.1-2.7v5.4zM17.6 10l-3.1-2.7v5.4z', k: 's', w: 0.8 },
+    ],
+  },
+  'zoom-time': { layers: [{ d: 'M5.5 10h9', k: 'l' }, { d: 'M2.4 10l3.4-3.2v6.4zM17.6 10l-3.4-3.2v6.4z', k: 's', w: 0.8 }] },
+  'zoom-pitch': { layers: [{ d: 'M10 5.5v9', k: 'l' }, { d: 'M10 2.4l3.2 3.4H6.8zM10 17.6l3.2-3.4H6.8z', k: 's', w: 0.8 }] },
+
+  /* appearance */
+  sun: {
+    layers: [
+      { d: dot(10, 10, 3.6), k: 'f' },
+      { d: 'M10 2.6v2M10 15.4v2M2.6 10h2M15.4 10h2M4.8 4.8l1.4 1.4M13.8 13.8l1.4 1.4M4.8 15.2l1.4-1.4M13.8 6.2l1.4-1.4', k: 'l' },
+    ],
+  },
+  moon: {
+    layers: [
+      { d: 'M15.9 12.3A6.6 6.6 0 0 1 7.7 4.1a6.6 6.6 0 1 0 8.2 8.2z', k: 's', w: 1.2 },
+      { d: 'M13.6 3.6v2.4M12.4 4.8h2.4', k: 'm', w: 1.4 },
+    ],
+  },
+
+  /* files */
+  folder: {
+    layers: [
+      { d: 'M2.5 5.6A1.6 1.6 0 0 1 4.1 4h3.4a1.6 1.6 0 0 1 1.2.5L10 6h5.9a1.6 1.6 0 0 1 1.6 1.6v6.8A1.6 1.6 0 0 1 15.9 16H4.1a1.6 1.6 0 0 1-1.6-1.6z', k: 't' },
+      { d: rr(2.5, 7.4, 15, 8.6, 1.6), k: 'f' },
+    ],
+  },
+  'folder-open': {
+    layers: [
+      { d: 'M2.5 14.4V5.6A1.6 1.6 0 0 1 4.1 4h3.4a1.6 1.6 0 0 1 1.2.5L10 6h5.9a1.6 1.6 0 0 1 1.6 1.6V9H2.5z', k: 't' },
+      { d: 'M5.6 8.8h11.6l-2 7.1H3.4z', k: 's', w: 1.4 },
+    ],
+  },
+  project: {
+    layers: [
+      { d: 'M5.6 2.5h5.9l4.9 4.9v9.1a1.2 1.2 0 0 1-1.2 1.2H5.6a1.2 1.2 0 0 1-1.2-1.2V3.7a1.2 1.2 0 0 1 1.2-1.2z', k: 't' },
+      { d: 'M11.5 2.5v3.8a1.1 1.1 0 0 0 1.1 1.1h3.8z', k: 'f' },
+      { d: 'M7.2 11.2h5.6M7.2 14h5.6', k: 'l', w: 1.5 },
+    ],
+  },
+  save: {
+    layers: [
+      { d: 'M4.5 2.5h9.3l3.7 3.7v9.3a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2z', k: 't' },
+      { d: 'M6 2.5h6v3.9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z', k: 'f' },
+      { d: 'M5.5 17.5v-4.2a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v4.2z', k: 'f' },
+    ],
+  },
+  export: {
+    layers: [
+      { d: 'M3.5 11.5v3.2a1.8 1.8 0 0 0 1.8 1.8h9.4a1.8 1.8 0 0 0 1.8-1.8v-3.2', k: 'l' },
+      { d: 'M10 12V4.6', k: 'l' },
+      { d: 'M10 2.6l3.8 4.1H6.2z', k: 's', w: 1 },
+    ],
+  },
+  help: {
+    layers: [
+      { d: dot(10, 10, 7.5), k: 't' },
+      { d: 'M7.9 8.1a2.1 2.1 0 1 1 3.4 1.7c-.9.7-1.3 1.1-1.3 2', k: 'l' },
+      { d: dot(10, 14.2, 1.05), k: 'f' },
+    ],
+  },
+  metronome: {
+    layers: [
+      { d: 'M7.4 3h5.2l2.6 13.5a1 1 0 0 1-1 1.2H5.8a1 1 0 0 1-1-1.2z', k: 't' },
+      { d: 'M10 14.6 12.7 5.4', k: 'l', w: 1.6 },
+      { d: rr(10.4, 7.2, 3.4, 2, 0.6), k: 'f' },
+      { d: 'M7.4 3h5.2l2.6 13.5a1 1 0 0 1-1 1.2H5.8a1 1 0 0 1-1-1.2z', k: 'l', w: 1.4 },
+    ],
+  },
+  loop: {
+    layers: [
+      { d: 'M5 9V8.2A3.2 3.2 0 0 1 8.2 5h6.3M15 11v.8a3.2 3.2 0 0 1-3.2 3.2H5.5', k: 'l' },
+      { d: 'M14.4 2.5l3.2 2.5-3.2 2.5zM5.6 12.5 2.4 15l3.2 2.5z', k: 's', w: 0.8 },
+    ],
+  },
+  record: { layers: [{ d: dot(10, 10, 5.4), k: 'f' }] },
+  caret: { layers: [{ d: 'M6 8.2h8L10 13z', k: 's', w: 0.9 }] },
+  star: { layers: [{ d: STAR, k: 'l', w: 1.5 }] },
+  'star-fill': { layers: [{ d: STAR, k: 's', w: 1.4 }] },
+
+  /* things in the project */
+  keys: {
+    layers: [
+      { d: rr(2.5, 4, 15, 12, 1.6), k: 't' },
+      { d: rr(2.5, 4, 15, 12, 1.6), k: 'l', w: 1.5 },
+      { d: 'M7.5 10.5V16M12.5 10.5V16', k: 'l', w: 1.5 },
+      { d: rr(6.2, 4, 2.6, 6.5, 0.6) + rr(11.2, 4, 2.6, 6.5, 0.6), k: 'f' },
+    ],
+  },
+  drum: { layers: [{ d: rr(3, 3, 14, 14, 2.4), k: 't' }, { d: dot(10, 10, 3.6), k: 'f' }] },
+  wave: {
+    layers: [
+      { d: 'M3.4 8.6v2.8M16.6 8.6v2.8', k: 'm', w: 1.9 },
+      { d: 'M6.7 5.6v8.8M13.3 5.6v8.8', k: 'l', w: 1.9 },
+      { d: 'M10 3.2v13.6', k: 'l', w: 1.9 },
+    ],
+  },
+  note: {
+    layers: [
+      { d: 'M8.4 14.2V5.6L16.2 3.8V12', k: 'l', w: 1.5 },
+      { d: 'M8.4 5.6 16.2 3.8v2.7L8.4 8.3z', k: 'f' },
+      { d: dot(6.2, 14.4, 2.3) + dot(14, 12.2, 2.3), k: 'f' },
+    ],
+  },
+  beat: { layers: cells(4, 2, 2.1, 5.4, 3.2, 1, [[0, 0], [2, 0], [1, 1], [3, 1]]) },
+
+  /* window toggles in the top bar: each one is a miniature of the panel it opens */
+  'window-browser': {
+    layers: [
+      { d: 'M5.6 6.1v8.4h2.2M5.6 10.4h2.2', k: 'm', w: 1.5 },
+      { d: rr(2.4, 3.2, 4.4, 3.4, 0.9) + rr(8.4, 8.6, 4.4, 3.4, 0.9) + rr(8.4, 13.4, 4.4, 3.4, 0.9), k: 'f' },
+      { d: 'M9 4.9h8M14.2 10.3h2.8M14.2 15.1h2.8', k: 'l', w: 1.6 },
+    ],
+  },
+  'window-rack': { layers: cells(4, 3, 2.1, 3.9, 3.2, 1, [[0, 0], [2, 0], [1, 1], [3, 1], [0, 2], [2, 2]]) },
+  'window-roll': {
+    layers: [
+      { d: rr(2.4, 3, 4, 14, 1), k: 't' },
+      { d: rr(2.4, 5, 2.6, 2.2, 0.5) + rr(2.4, 9, 2.6, 2.2, 0.5) + rr(2.4, 13, 2.6, 2.2, 0.5), k: 'f' },
+      { d: 'M9.6 5.6h3.8M12.6 10h4.6M8.6 14.4h3.4', k: 'l', w: 2.6 },
+    ],
+  },
+  'window-playlist': {
+    layers: [
+      { d: rr(2.4, 3.4, 3.4, 3.2, 0.8) + rr(2.4, 8.4, 3.4, 3.2, 0.8) + rr(2.4, 13.4, 3.4, 3.2, 0.8), k: 't' },
+      { d: rr(7.6, 3.4, 5.8, 3.2, 0.8) + rr(10.6, 8.4, 7, 3.2, 0.8) + rr(7.6, 13.4, 4.2, 3.2, 0.8), k: 'f' },
+      { d: rr(14.4, 3.4, 3.2, 3.2, 0.8) + rr(13, 13.4, 4.6, 3.2, 0.8), k: 't' },
+    ],
+  },
+  'window-mixer': {
+    layers: [
+      { d: 'M4.8 3.5v13M10 3.5v13M15.2 3.5v13', k: 'm', w: 2 },
+      { d: rr(2.6, 9, 4.4, 3.2, 0.9) + rr(7.8, 4.4, 4.4, 3.2, 0.9) + rr(13, 11.6, 4.4, 3.2, 0.9), k: 'f' },
+    ],
+  },
 };
 
-export function Icon({ name, size = 'md' }: { name: IconName; size?: 'sm' | 'md' }) {
+export function Icon({ name, size = 'md' }: { name: IconName; size?: 'sm' | 'md' | 'lg' }) {
   const g = GLYPHS[name];
+  const layers = g.layers.map((l, i) => <path key={i} className={`icon-${l.k}`} d={l.d} style={l.w === undefined ? undefined : { strokeWidth: l.w }} />);
   return (
-    <svg className="icon" data-size={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill={g.fill ? 'currentColor' : 'none'} stroke={g.fill ? 'none' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d={g.d} />
+    <svg className="icon" data-size={size} viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+      {g.mirror ? <g transform="matrix(-1 0 0 1 20 0)">{layers}</g> : layers}
     </svg>
   );
 }
+
+/** Every icon name, for the contact sheet and tests. */
+export const ICON_NAMES = Object.keys(GLYPHS) as IconName[];
