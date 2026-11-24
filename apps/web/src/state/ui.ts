@@ -1,5 +1,8 @@
 /** Interface state that is not part of the project: what is selected, which tool, snap, which panel is open on a phone. */
-import { LAYOUT_PRESETS, fitLayout, setMaximized, toggleHidden, type LayoutPresetId, type PanelId, type SnapId, type WorkspaceLayout } from '@pro-studio/shared';
+import {
+  LAYOUT_PRESETS, bringToFront, cascadeLayout, dockAll, dockPanel, fitLayout, floatPanel, sanitizeFloating, setFloatRect, setFolded, setMaximized,
+  tileLayout, toggleHidden, type Bounds, type LayoutPresetId, type PanelId, type SnapId, type WindowRect, type WorkspaceLayout,
+} from '@pro-studio/shared';
 import { createStore, safeStorage, useStore } from './store';
 
 export type RollTool = 'draw' | 'select' | 'erase' | 'pan';
@@ -58,7 +61,7 @@ function loadLayout(): { preset: LayoutPresetId; layout: WorkspaceLayout } {
       const num = (x: unknown, d: number): number => (typeof x === 'number' && Number.isFinite(x) ? x : d);
       return {
         preset: o.preset && o.preset in LAYOUT_PRESETS ? o.preset : 'beat',
-        layout: { ...base, browserW: num(l.browserW, base.browserW), rackW: num(l.rackW, base.rackW), topH: num(l.topH, base.topH), mixerH: num(l.mixerH, base.mixerH), hidden: Array.isArray(l.hidden) ? l.hidden : base.hidden, maximized: null },
+        layout: { ...base, browserW: num(l.browserW, base.browserW), rackW: num(l.rackW, base.rackW), topH: num(l.topH, base.topH), mixerH: num(l.mixerH, base.mixerH), hidden: Array.isArray(l.hidden) ? l.hidden : base.hidden, maximized: null, ...sanitizeFloating(l) },
       };
     } catch {
       /* fall through to the default */
@@ -94,6 +97,52 @@ export const workspaceLayout = {
     layoutStore.set((s) => ({ ...s, layout: setMaximized(s.layout, id) }));
   },
   fitted: fitLayout,
+
+  /* ---- floating windows. Each of these is one change to the layout, saved with it. ---- */
+
+  /** The size of the workspace box; the Workspace reports it so menu commands can place windows without measuring. */
+  bounds: { width: 1280, height: 720 } as Bounds,
+  setBounds(b: Bounds): void {
+    workspaceLayout.bounds = b;
+  },
+  /** Pop a panel out of the dock into a window. */
+  float(id: PanelId, rect: WindowRect): void {
+    layoutStore.set((s) => ({ ...s, layout: floatPanel(s.layout, id, rect, workspaceLayout.bounds) }));
+    persist();
+  },
+  dock(id: PanelId): void {
+    layoutStore.set((s) => ({ ...s, layout: dockPanel(s.layout, id) }));
+    persist();
+  },
+  dockAll(): void {
+    layoutStore.set((s) => ({ ...s, layout: dockAll(s.layout) }));
+    persist();
+  },
+  /** Commit a window's new place (called when a drag ends or a key moves it). */
+  setRect(id: PanelId, rect: WindowRect): void {
+    layoutStore.set((s) => ({ ...s, layout: setFloatRect(s.layout, id, rect, workspaceLayout.bounds) }));
+    persist();
+  },
+  /** Raise a window. Cheap to call on every pointer down: nothing changes when it is already on top. */
+  raise(id: PanelId): void {
+    layoutStore.set((s) => {
+      const layout = bringToFront(s.layout, id);
+      return layout === s.layout ? s : { ...s, layout };
+    });
+    persist();
+  },
+  fold(id: PanelId, folded: boolean): void {
+    layoutStore.set((s) => ({ ...s, layout: setFolded(s.layout, id, folded) }));
+    persist();
+  },
+  cascade(): void {
+    layoutStore.set((s) => ({ ...s, layout: cascadeLayout(s.layout, workspaceLayout.bounds) }));
+    persist();
+  },
+  tile(): void {
+    layoutStore.set((s) => ({ ...s, layout: tileLayout(s.layout, workspaceLayout.bounds) }));
+    persist();
+  },
 };
 
 export const useLayout = (): WorkspaceLayout => useStore(layoutStore, (s) => s.layout);

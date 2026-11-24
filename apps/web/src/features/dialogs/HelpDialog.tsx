@@ -22,6 +22,15 @@ const ROLL_ROWS: ReadonlyArray<[string, string]> = [
   ['Mod+A, Mod+D', 'Select all, duplicate the selection'],
 ];
 
+const WINDOW_ROWS: ReadonlyArray<[string, string]> = [
+  ['Drag a title bar', 'Move a floating window; drag a docked panel\'s title bar out of the dock to pop it into a window'],
+  ['Drag an edge or corner', 'Resize a floating window'],
+  ['Double-click a title bar', 'Maximize the panel, or restore it'],
+  ['Arrow keys on a window title', 'Move the window 16 px (Ctrl+Arrows: 64 px)'],
+  ['Shift+Arrows on a window title', 'Resize the window 16 px (Ctrl+Shift+Arrows: 64 px)'],
+  ['Escape while dragging', 'Cancel the move or resize'],
+];
+
 const BROWSER_ROWS: ReadonlyArray<[string, string]> = [
   ['Arrow keys', 'Walk the list; Right opens a folder, Left closes it'],
   ['Home, End', 'Jump to the first or last row'],
@@ -51,6 +60,12 @@ export function HelpDialog() {
       <dl className="shortcut-list">
         {PIANO_ROWS.map(([k, d]) => (
           <div key={k} className="shortcut-row"><dt><kbd>{k}</kbd></dt><dd>{d}</dd></div>
+        ))}
+      </dl>
+      <h3 className="dialog-subtitle">Windows</h3>
+      <dl className="shortcut-list">
+        {WINDOW_ROWS.map(([k, d]) => (
+          <div key={k} className="shortcut-row"><dt><kbd>{mod(k)}</kbd></dt><dd>{d}</dd></div>
         ))}
       </dl>
       <h3 className="dialog-subtitle">In the browser</h3>

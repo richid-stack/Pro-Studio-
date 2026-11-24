@@ -13,7 +13,7 @@
  * Icons are decoration: the control that holds one carries the accessible name.
  */
 export type IconName =
-  | 'play' | 'pause' | 'stop' | 'undo' | 'redo' | 'plus' | 'minus' | 'close' | 'maximize' | 'restore' | 'chevron' | 'check'
+  | 'play' | 'pause' | 'stop' | 'undo' | 'redo' | 'plus' | 'minus' | 'close' | 'maximize' | 'restore' | 'minimize' | 'float' | 'dock' | 'chevron' | 'check'
   | 'search' | 'speaker' | 'more' | 'keys' | 'draw' | 'select' | 'erase' | 'pan' | 'sun' | 'moon' | 'zoom-time' | 'zoom-pitch'
   | 'folder' | 'folder-open' | 'project' | 'drum' | 'wave' | 'note' | 'beat' | 'star' | 'star-fill' | 'collapse'
   | 'save' | 'export' | 'help' | 'metronome' | 'loop' | 'record' | 'caret' | 'window-browser' | 'window-rack' | 'window-roll' | 'window-playlist' | 'window-mixer';
@@ -73,6 +73,22 @@ const GLYPHS: Record<IconName, Glyph> = {
   close: { layers: [{ d: 'M5.2 5.2l9.6 9.6M14.8 5.2l-9.6 9.6', k: 'l' }] },
   maximize: { layers: [{ d: 'M3.8 7.8V4.8a1 1 0 0 1 1-1h3M16.2 7.8V4.8a1 1 0 0 0-1-1h-3M3.8 12.2v3a1 1 0 0 0 1 1h3M16.2 12.2v3a1 1 0 0 1-1 1h-3', k: 'l' }] },
   restore: { layers: [{ d: 'M7.8 3.8v3a1 1 0 0 1-1 1h-3M12.2 3.8v3a1 1 0 0 0 1 1h3M7.8 16.2v-3a1 1 0 0 0-1-1h-3M12.2 16.2v-3a1 1 0 0 1 1-1h3', k: 'l' }] },
+  /* window controls: fold to the title bar, pop out of the dock, snap back in */
+  minimize: { layers: [{ d: rr(4.5, 12.6, 11, 3.2, 1), k: 't' }, { d: 'M4.5 14.2h11', k: 'l', w: 2.2 }] },
+  float: {
+    layers: [
+      { d: rr(3.5, 7, 9.5, 9.5, 1.4), k: 't' },
+      { d: 'M13 11.8v2.6a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2H8', k: 'l' },
+      { d: 'M10.6 9.4l5.9-5.9M11.6 3.5h4.9v4.9', k: 'l' },
+    ],
+  },
+  dock: {
+    layers: [
+      { d: rr(3, 3.5, 14, 13, 1.6), k: 'l' },
+      { d: rr(5.6, 6.2, 8.8, 7.6, 1), k: 't' },
+      { d: rr(5.6, 6.2, 8.8, 2.6, 1), k: 'f' },
+    ],
+  },
   chevron: { layers: [{ d: 'M5.5 8l4.5 4.5L14.5 8', k: 'l' }] },
   collapse: { layers: [{ d: 'M5.5 9.2L10 4.7l4.5 4.5', k: 'l' }, { d: 'M5.5 15.2l4.5-4.5 4.5 4.5', k: 'm' }] },
   check: { layers: [{ d: 'M4.5 10.5l3.6 3.6 7.4-8.2', k: 'l' }] },

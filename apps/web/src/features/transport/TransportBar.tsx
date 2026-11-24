@@ -185,6 +185,33 @@ export function TransportBar({ isMobile }: { isMobile: boolean }) {
           })),
         ] as MenuItem[])
       : []),
+    ...(show('floating-windows') && !isMobile
+      ? ([
+          { separator: true },
+          {
+            label: 'Cascade windows',
+            onSelect: () => {
+              workspaceLayout.cascade();
+              uiState.announce('Every shown panel is now a floating window, stepped from the top left.');
+            },
+          },
+          {
+            label: 'Tile windows',
+            onSelect: () => {
+              workspaceLayout.tile();
+              uiState.announce('Every shown panel is now a floating window, tiled to fill the workspace.');
+            },
+          },
+          {
+            label: 'Dock all windows',
+            disabled: Object.keys(layout.floating).length === 0,
+            onSelect: () => {
+              workspaceLayout.dockAll();
+              uiState.announce('Every window is docked again.');
+            },
+          },
+        ] as MenuItem[])
+      : []),
   ];
 
   const optionItems: MenuItem[] = [

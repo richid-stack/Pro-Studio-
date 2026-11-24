@@ -4,6 +4,7 @@ import '@pro-studio/ui/styles/index.css';
 import './styles/shell.css';
 import './styles/topbar.css';
 import './styles/workspace.css';
+import './styles/windows.css';
 import './styles/controls.css';
 import './styles/rack.css';
 import './styles/mixer.css';

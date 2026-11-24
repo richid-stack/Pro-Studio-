@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import {
-  MAX_BROWSER_W, MIN_BROWSER_W, MIN_MIXER_H, MIN_RACK_W, MIN_ROLL_H, MIN_TOP_H, MIN_PLAYLIST_W, SPLITTER, fitLayout, isFeatureVisible,
-  type PanelId, type WorkspaceLayout,
+  DEFAULT_FLOAT, MAX_BROWSER_W, MIN_BROWSER_W, MIN_MIXER_H, MIN_RACK_W, MIN_ROLL_H, MIN_TOP_H, MIN_PLAYLIST_W, PANEL_LABELS, SPLITTER, clampRect, fitFloating, fitLayout,
+  isFeatureVisible, visibleFloating, MIN_FLOAT, type Bounds, type PanelId, type WindowRect, type WorkspaceLayout,
 } from '@pro-studio/shared';
+import { FloatingWindow } from '../../components/FloatingWindow';
 import { PanelFrame } from '../../components/PanelFrame';
+import { handOverDrag } from '../../components/windowDrag';
 import { Splitter } from '../../components/Splitter';
 import { uiState, useLayout, useUi, workspaceLayout } from '../../state/ui';
 import { usePreferences } from '../../state/usePreferences';
@@ -30,7 +32,9 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 1280, height: 720 });
   const canDock = isFeatureVisible('dock-layouts', mode) && !isMobile;
+  const canFloat = isFeatureVisible('floating-windows', mode) && !isMobile;
   const playlistOk = isFeatureVisible('playlist', mode);
+  const [bounds, setBounds] = useState<Bounds>({ width: 1280, height: 720 });
 
   useEffect(() => {
     const el = box.current;
@@ -39,6 +43,10 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
       if (!entry) return;
       const { width, height } = entry.contentRect;
       setSize((s) => (Math.abs(s.width - width) < 0.5 && Math.abs(s.height - height) < 0.5 ? s : { width, height }));
+      // windows are placed against the whole box, padding included
+      const b = { width: el.clientWidth, height: el.clientHeight };
+      workspaceLayout.setBounds(b);
+      setBounds((old) => (old.width === b.width && old.height === b.height ? old : b));
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -46,11 +54,44 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
 
   // the playlist belongs to Standard and up, whatever the saved layout says
   const hidden: readonly PanelId[] = playlistOk ? layout.hidden : [...new Set<PanelId>([...layout.hidden, 'playlist'])];
-  const fitted: WorkspaceLayout = fitLayout({ ...layout, hidden }, { width: size.width, height: size.height, barH: 0 });
   const maximized = canDock ? layout.maximized : null;
+  // windows float above the dock and take no room in it; they step aside while a panel is maximized
+  const floatIds: PanelId[] = canFloat && !maximized ? visibleFloating({ ...layout, hidden }) : [];
+  const docked: readonly PanelId[] = [...hidden, ...floatIds];
+  const fitted: WorkspaceLayout = fitLayout({ ...layout, hidden: docked }, { width: size.width, height: size.height, barH: 0 });
+  const windowRects = fitFloating(layout, bounds).floating;
 
   // the roll's tools live in its header, as in other DAWs; the roll renders into this slot (see PianoRoll's toolsHost)
   const [rollTools, setRollTools] = useState<HTMLElement | null>(null);
+
+  /**
+   * The rect a docked panel takes when it becomes a window: the panel's usual window size, placed just below and right
+   * of where it was, or with the pointer on its title bar when it was dragged out.
+   */
+  const windowRectFor = (id: PanelId, pointer?: { clientX: number; clientY: number }): WindowRect => {
+    const box_ = box.current;
+    const el = box_?.querySelector<HTMLElement>(`.workspace [data-panel="${id}"]`);
+    const d = DEFAULT_FLOAT[id];
+    if (!box_ || !el) return clampRect({ x: 24, y: 16, ...d }, MIN_FLOAT[id], bounds);
+    const bb = box_.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    const w = Math.max(MIN_FLOAT[id].w, Math.min(d.w, Math.round(bounds.width * 0.9)));
+    const h = Math.max(MIN_FLOAT[id].h, Math.min(d.h, Math.round(bounds.height * 0.9)));
+    const x = pointer ? pointer.clientX - bb.left - w * 0.3 : r.left - bb.left + 24;
+    const y = pointer ? pointer.clientY - bb.top - 14 : r.top - bb.top + 24;
+    // keep a pop-out fully inside the box; a dragged-out window follows the pointer wherever it is
+    return pointer
+      ? { x, y, w, h }
+      : { x: Math.max(0, Math.min(x, bounds.width - w)), y: Math.max(0, Math.min(y, bounds.height - h)), w, h };
+  };
+  const popOut = (id: PanelId): void => {
+    workspaceLayout.float(id, windowRectFor(id));
+    uiState.announce(`${PANEL_LABELS[id]} is now a floating window.`);
+  };
+  const detach = (id: PanelId, pointer: { clientX: number; clientY: number }): void => {
+    handOverDrag({ id, ...pointer });
+    workspaceLayout.float(id, windowRectFor(id, pointer));
+  };
 
   const frame = (id: PanelId, body: ReactNode, badge?: string): ReactNode => (
     <PanelFrame
@@ -60,6 +101,8 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
       onToggleMaximize={() => workspaceLayout.maximize(maximized === id ? null : id)}
       badge={badge}
       tools={id === 'roll' && !isMobile ? <div className="roll-tools-slot" ref={setRollTools} /> : undefined}
+      onFloat={canFloat && !maximized ? () => popOut(id) : undefined}
+      onDetach={canFloat && !maximized ? (pointer) => detach(id, pointer) : undefined}
     >
       {body}
     </PanelFrame>
@@ -162,15 +205,52 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
         )}
         <div className="stage" style={{ gridTemplateRows: stageRows.join(' ') }}>
           {stage}
-          {rows.length === 0 && <p className="empty">Every panel is hidden. Use the View menu to show one.</p>}
+          {rows.length === 0 && floatIds.length === 0 && <p className="empty">Every panel is hidden. Use the View menu to show one.</p>}
         </div>
       </div>
     );
   }
 
+  const floating = floatIds.map((id, i) => {
+    const rect = windowRects[id];
+    if (!rect) return null;
+    return (
+      <FloatingWindow
+        key={id}
+        id={id}
+        rect={rect}
+        bounds={bounds}
+        order={i}
+        active={i === floatIds.length - 1}
+        folded={layout.folded.includes(id)}
+        canMaximize={canDock}
+        badge={badges[id]}
+        tools={id === 'roll' ? <div className="roll-tools-slot" ref={setRollTools} /> : undefined}
+        onCommit={(r) => workspaceLayout.setRect(id, r)}
+        onRaise={() => workspaceLayout.raise(id)}
+        onFold={(f) => {
+          workspaceLayout.fold(id, f);
+          uiState.announce(`${PANEL_LABELS[id]} ${f ? 'collapsed to its title bar' : 'expanded'}.`);
+        }}
+        onDock={() => {
+          workspaceLayout.dock(id);
+          uiState.announce(`${PANEL_LABELS[id]} is docked again.`);
+        }}
+        onClose={() => {
+          workspaceLayout.toggle(id);
+          uiState.announce(`${PANEL_LABELS[id]} is closed. Show it again from the View menu.`);
+        }}
+        onMaximize={() => workspaceLayout.maximize(id)}
+      >
+        {bodies[id]}
+      </FloatingWindow>
+    );
+  });
+
   return (
     <main className="workspace-box" id="workspace" ref={box}>
       {content}
+      {floating.some(Boolean) && <div className="float-layer">{floating}</div>}
     </main>
   );
 }

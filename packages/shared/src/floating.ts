@@ -98,10 +98,8 @@ export function defaultFloatRect(id: PanelId, b: Bounds, index = 0): WindowRect 
 export const isFloating = (l: WorkspaceLayout, id: PanelId): boolean => l.floating[id] !== undefined;
 
 const withoutId = (list: readonly PanelId[], id: PanelId): PanelId[] => list.filter((p) => p !== id);
-const rest = (m: WorkspaceLayout['floating'], id: PanelId): WorkspaceLayout['floating'] => {
-  const { [id]: _gone, ...others } = m;
-  return others;
-};
+const rest = (m: WorkspaceLayout['floating'], id: PanelId): WorkspaceLayout['floating'] =>
+  Object.fromEntries(Object.entries(m).filter(([key]) => key !== id));
 
 /** Pop a panel out of the dock into a window at `rect` (clamped), on top of the others. */
 export function floatPanel(l: WorkspaceLayout, id: PanelId, rect: WindowRect, b: Bounds): WorkspaceLayout {
