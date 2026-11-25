@@ -14,7 +14,7 @@
  */
 export type IconName =
   | 'play' | 'pause' | 'stop' | 'undo' | 'redo' | 'plus' | 'minus' | 'close' | 'maximize' | 'restore' | 'minimize' | 'float' | 'dock' | 'chevron' | 'check'
-  | 'search' | 'speaker' | 'more' | 'keys' | 'draw' | 'select' | 'erase' | 'pan' | 'sun' | 'moon' | 'zoom-time' | 'zoom-pitch'
+  | 'search' | 'speaker' | 'more' | 'keys' | 'draw' | 'select' | 'erase' | 'pan' | 'magnet' | 'quantize' | 'slide' | 'scale' | 'follow' | 'trash' | 'mute' | 'solo' | 'slice' | 'brush' | 'sun' | 'moon' | 'zoom-time' | 'zoom-pitch'
   | 'folder' | 'folder-open' | 'project' | 'drum' | 'wave' | 'note' | 'beat' | 'star' | 'star-fill' | 'collapse'
   | 'save' | 'export' | 'help' | 'metronome' | 'loop' | 'record' | 'caret' | 'window-browser' | 'window-rack' | 'window-roll' | 'window-playlist' | 'window-mixer';
 
@@ -130,6 +130,75 @@ const GLYPHS: Record<IconName, Glyph> = {
     layers: [
       { d: 'M10 5.5v9M5.5 10h9', k: 'l' },
       { d: 'M10 2.4l2.7 3.1H7.3zM10 17.6l2.7-3.1H7.3zM2.4 10l3.1-2.7v5.4zM17.6 10l-3.1-2.7v5.4z', k: 's', w: 0.8 },
+    ],
+  },
+  /* snapping, timing and editing tools */
+  magnet: {
+    layers: [
+      { d: 'M5 5v5.4a5 5 0 0 0 10 0V5', k: 'm', w: 3.2 },
+      { d: rr(3.4, 3, 3.2, 4.2, 0.6), k: 'f' },
+      { d: rr(13.4, 3, 3.2, 4.2, 0.6), k: 'f' },
+    ],
+  },
+  quantize: {
+    layers: [
+      { d: 'M5 3.5v13M10 3.5v13M15 3.5v13', k: 'm', w: 1 },
+      { d: rr(5, 5.6, 5, 3.2, 0.8), k: 'f' },
+      { d: rr(10, 11.2, 5, 3.2, 0.8), k: 'f' },
+    ],
+  },
+  slide: {
+    layers: [
+      { d: rr(2.8, 11.6, 5.2, 3.4, 0.8), k: 'f' },
+      { d: rr(12, 5, 5.2, 3.4, 0.8), k: 'f' },
+      { d: 'M8 13.3c3 0 1.2-6.6 4-6.6', k: 'l', w: 1.5 },
+    ],
+  },
+  scale: {
+    layers: [
+      { d: 'M3 16.6h3.5v-3.3H10v-3.3h3.5V6.7H17v9.9z', k: 't' },
+      { d: 'M3 16.6h3.5v-3.3H10v-3.3h3.5V6.7H17', k: 'l', w: 1.5 },
+      { d: dot(4.8, 11.9, 1.15) + dot(8.3, 8.6, 1.15) + dot(11.8, 5.3, 1.15), k: 'f' },
+    ],
+  },
+  follow: {
+    layers: [
+      { d: 'M6.2 3v14', k: 'l', w: 2 },
+      { d: 'M10.4 6.6 17 10l-6.6 3.4z', k: 's', w: 0.8 },
+    ],
+  },
+  trash: {
+    layers: [
+      { d: 'M5.4 7.6h9.2l-.7 8.1a1.5 1.5 0 0 1-1.5 1.4H7.6a1.5 1.5 0 0 1-1.5-1.4z', k: 't' },
+      { d: 'M5.4 7.6h9.2l-.7 8.1a1.5 1.5 0 0 1-1.5 1.4H7.6a1.5 1.5 0 0 1-1.5-1.4z', k: 'l', w: 1.5 },
+      { d: 'M3.8 5.4h12.4M8 5.4V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.4', k: 'l', w: 1.5 },
+      { d: 'M8.5 9.6v4.6M11.5 9.6v4.6', k: 'm', w: 1.4 },
+    ],
+  },
+  mute: {
+    layers: [
+      { d: 'M2.6 7.8h2.8l4.3-3.5a.5.5 0 0 1 .8.4v10.6a.5.5 0 0 1-.8.4l-4.3-3.5H2.6z', k: 's', w: 1 },
+      { d: 'M13.2 7.8l4.2 4.4M17.4 7.8l-4.2 4.4', k: 'l' },
+    ],
+  },
+  solo: {
+    layers: [
+      { d: 'M4 12.6V10a6 6 0 0 1 12 0v2.6', k: 'l', w: 1.8 },
+      { d: rr(2.8, 11.4, 3.6, 5.4, 1.3), k: 'f' },
+      { d: rr(13.6, 11.4, 3.6, 5.4, 1.3), k: 'f' },
+    ],
+  },
+  slice: {
+    layers: [
+      { d: rr(2.8, 5.8, 5.4, 8.4, 1.1), k: 't' },
+      { d: rr(11.8, 5.8, 5.4, 8.4, 1.1), k: 't' },
+      { d: 'M10 2.8v2.8M10 8.2v3.6M10 14.4v2.8', k: 'l', w: 1.7 },
+    ],
+  },
+  brush: {
+    layers: [
+      { d: 'M16.4 3.6 10.4 9.6', k: 'l', w: 2.2 },
+      { d: 'M9.4 9.6a3.2 3.2 0 0 1 3 3c0 2.6-2.9 4.2-7.2 3.6 1.1-.8 1.5-1.8 1.5-3a3.2 3.2 0 0 1 2.7-3.6z', k: 'f' },
     ],
   },
   'zoom-time': { layers: [{ d: 'M5.5 10h9', k: 'l' }, { d: 'M2.4 10l3.4-3.2v6.4zM17.6 10l-3.4-3.2v6.4z', k: 's', w: 0.8 }] },

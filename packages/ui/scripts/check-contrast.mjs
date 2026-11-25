@@ -96,6 +96,8 @@ const checks = [
   ['--lit-ink', '--lit-glow', 4.5],
   ...PANELS.map((bg) => ['--led-on', bg, 3]),
   ...PANELS.map((bg) => ['--record', bg, 3]),
+  // tool outlines against every panel surface they sit on
+  ...['--tool-draw', '--tool-select', '--tool-erase', '--tool-mute', '--tool-snap'].flatMap((t) => PANELS.map((bg) => [t, bg, 3])),
   ...CHANNELS.flatMap((c) => [[c, '--surface-1', 3], [c, '--surface-inset', 3], ['--text-on-channel', c, 4.5]]),
 ];
 

@@ -232,6 +232,12 @@
   --led-on: #5cff5c;
   --led-off: #646a6d;
   --record: #ff6b5c;
+  /* tool colours: each tool lights its outline in its own colour, so the active tool reads at a glance */
+  --tool-draw: #fcba40;
+  --tool-select: #7bcefd;
+  --tool-erase: #ff6d65;
+  --tool-mute: #ff66b8;
+  --tool-snap: #7eefa9;
 
   /* fader and knob hardware */
   --cap-top: #f2f1f1;
@@ -333,6 +339,11 @@
   --led-on: #0a8a35;
   --led-off: #8a979d;
   --record: #d6301f;
+  --tool-draw: #8a5200;
+  --tool-select: #0a5f94;
+  --tool-erase: #b3201a;
+  --tool-mute: #a8106a;
+  --tool-snap: #0a6b32;
 
   --cap-top: #f7f7f7;
   --cap-bottom: #a8a8a8;
