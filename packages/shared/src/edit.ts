@@ -104,6 +104,18 @@ export function setMix(p: Project, channelId: string, patch: Partial<MixSettings
   });
 }
 
+/** Un-mute every channel. Returns the same project when nothing is muted, so the caller can skip an undo step. */
+export function unmuteAll(p: Project): Project {
+  if (!p.channels.some((c) => c.mix.mute)) return p;
+  return { ...p, channels: p.channels.map((c) => (c.mix.mute ? { ...c, mix: { ...c.mix, mute: false } } : c)) };
+}
+
+/** Take every channel out of solo. Returns the same project when none is soloed. */
+export function clearSolo(p: Project): Project {
+  if (!p.channels.some((c) => c.mix.solo)) return p;
+  return { ...p, channels: p.channels.map((c) => (c.mix.solo ? { ...c, mix: { ...c.mix, solo: false } } : c)) };
+}
+
 export function renameChannel(p: Project, channelId: string, name: string): Project {
   const trimmed = name.trim().slice(0, 40);
   return trimmed ? mapChannel(p, channelId, (c) => ({ ...c, name: trimmed })) : p;

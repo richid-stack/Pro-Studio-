@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
-  addDrumChannel, addInstrumentChannel, addNote, addNotes, clearChannel, createStarterProject, deleteNotes, duplicateNotes,
+  addDrumChannel, addInstrumentChannel, addNote, addNotes, clearChannel, clearSolo, unmuteAll, createStarterProject, deleteNotes, duplicateNotes,
   findChannel, moveChannel, moveNotes, quantizeNotes, removeChannel, renameChannel, resizeNotes, setBars, setBpm, setMix,
   setKey, setScale, setNoteSlide, setNoteVelocity, setRatchet, setStepVelocity, setSwing, toggleStep, totalSteps, MAX_NOTE, MIN_NOTE,
   type DrumChannel, type InstrumentChannel, type Project,
@@ -10,6 +10,27 @@ import {
 const base = (): Project => createStarterProject('trap');
 const drumOf = (p: Project, id: string) => findChannel(p, id) as DrumChannel;
 const instOf = (p: Project, id: string) => findChannel(p, id) as InstrumentChannel;
+
+describe('mixer-wide edits', () => {
+  it('unmuteAll clears every mute and nothing else, and is a no-op when nothing is muted', () => {
+    const p = base();
+    assert.equal(unmuteAll(p), p);
+    const muted = setMix(setMix(p, 'kick', { mute: true, db: -7 }), 'hat', { mute: true, solo: true });
+    const u = unmuteAll(muted);
+    assert.ok(u.channels.every((c) => !c.mix.mute));
+    assert.equal(findChannel(u, 'kick')?.mix.db, -7);
+    assert.equal(findChannel(u, 'hat')?.mix.solo, true);
+    assert.equal(findChannel(muted, 'kick')?.mix.mute, true);
+  });
+  it('clearSolo takes every channel out of solo and leaves mutes alone, and is a no-op when none is soloed', () => {
+    const p = base();
+    assert.equal(clearSolo(p), p);
+    const soloed = setMix(setMix(p, 'kick', { solo: true }), 'hat', { solo: true, mute: true });
+    const c = clearSolo(soloed);
+    assert.ok(c.channels.every((ch) => !ch.mix.solo));
+    assert.equal(findChannel(c, 'hat')?.mix.mute, true);
+  });
+});
 
 describe('edits never mutate their input', () => {
   it('returns a new project and leaves the old one untouched', () => {
