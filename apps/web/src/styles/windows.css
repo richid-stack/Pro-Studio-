@@ -14,7 +14,6 @@
   }
   .fwin {
     position: absolute;
-    container: fwin / inline-size;
     pointer-events: auto;
     box-shadow: var(--shadow-popover), inset 0 1px 0 var(--bevel-light);
   }
@@ -34,22 +33,9 @@
     display: none;
   }
 
-  /* a window too narrow for its tools and its buttons on one line puts the tools on a second row, so no button is ever clipped */
-  .fwin .panel-header {
-    flex-wrap: wrap;
-  }
   .fwin .fwin-buttons {
     margin-left: auto;
     flex: none;
-  }
-  @container fwin (max-width: 60rem) {
-    .fwin .panel-header .panel-tools {
-      order: 3;
-      flex: 1 1 100%;
-      margin: 0;
-      padding: 0 var(--space-2) var(--space-1) 0;
-      overflow-x: auto;
-    }
   }
 
   /* the title bar is the handle */

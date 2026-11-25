@@ -8,6 +8,9 @@
     min-height: 0;
     min-width: 0;
   }
+  .rack[data-header-tools] {
+    grid-template-rows: minmax(0, 1fr);
+  }
   .rack-bar {
     display: flex;
     align-items: center;

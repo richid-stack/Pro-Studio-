@@ -1,10 +1,14 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { STEPS_PER_BAR, STEP_TICKS, totalSteps, type Channel, type Project } from '@pro-studio/shared';
 import { audioHost } from '../../audio/audioHost';
 import { channelColorValue, fitCanvas, lengthToken, readColors } from '../../lib/canvasTheme';
 import { preferences } from '../../state/preferences';
 import { useProject } from '../../state/studio';
+import { ToolButton, ToolGroup, Toolbar, type ToolHue } from '../../components/Toolbar';
+import type { IconName } from '../../components/Icon';
 import { transport } from '../../state/transport';
+import { uiState } from '../../state/ui';
 
 function drawPattern(canvas: HTMLCanvasElement, project: Project, width: number, height: number, lane: number): void {
   const ctx = fitCanvas(canvas, width, height);
@@ -50,7 +54,21 @@ function drawPattern(canvas: HTMLCanvasElement, project: Project, width: number,
  * An honest preview of the arrangement: the one pattern that loops, with every channel on its own lane.
  * Click the ruler to move the playhead. Placing several patterns along a timeline is on the roadmap (docs/ROADMAP.md).
  */
-export function Playlist() {
+type PlaylistTool = 'draw' | 'brush' | 'erase' | 'mute' | 'slice' | 'select';
+// PREVIEW: these tools are the planned playlist tools. Picking one lights it up and says so; nothing is placed yet.
+const PLAYLIST_TOOLS: ReadonlyArray<{ id: PlaylistTool; icon: IconName; label: string; hue: ToolHue }> = [
+  { id: 'draw', icon: 'draw', label: 'Draw clips', hue: 'draw' },
+  { id: 'brush', icon: 'brush', label: 'Paint clips', hue: 'select' },
+  { id: 'erase', icon: 'erase', label: 'Delete clips', hue: 'erase' },
+  { id: 'mute', icon: 'mute', label: 'Mute clips', hue: 'mute' },
+  { id: 'slice', icon: 'slice', label: 'Slice clips', hue: 'plain' },
+  { id: 'select', icon: 'select', label: 'Select clips', hue: 'select' },
+];
+
+export function Playlist({ toolsHost }: { toolsHost: HTMLElement | null }) {
+  const [tool, setTool] = useState<PlaylistTool>('draw');
+  const [snapOn, setSnapOn] = useState(true);
+  const say = (what: string): void => uiState.announce(`${what} is a preview and does nothing yet.`);
   const project = useProject();
   const area = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -105,11 +123,44 @@ export function Playlist() {
     transport.seek(Math.floor(frac * steps) * STEP_TICKS);
   };
 
+  const toolbar = (
+    <Toolbar label="Playlist tools" className="playlist-toolbar">
+      <ToolGroup label="Tool">
+        {PLAYLIST_TOOLS.map((t) => (
+          <ToolButton
+            key={t.id}
+            icon={t.icon}
+            label={t.label}
+            hue={t.hue}
+            preview
+            pressed={tool === t.id}
+            onClick={() => {
+              setTool(t.id);
+              say(t.label);
+            }}
+          />
+        ))}
+      </ToolGroup>
+      <ToolGroup label="Snap">
+        <ToolButton
+          icon="magnet"
+          label="Snap to grid"
+          hue="snap"
+          preview
+          pressed={snapOn}
+          onClick={() => {
+            setSnapOn((v) => !v);
+            say('Snap to grid');
+          }}
+        />
+      </ToolGroup>
+    </Toolbar>
+  );
   return (
-    <div className="playlist">
-      <p className="playlist-note">
-        This is a preview. One pattern loops, and each channel has its own lane. Placing several patterns along a timeline is on the roadmap.
-      </p>
+    <div className="playlist" data-header-tools={toolsHost ? '' : undefined}>
+      {toolsHost && createPortal(toolbar, toolsHost)}
+      {!toolsHost && <div className="playlist-bar">{toolbar}</div>}
+      <p className="playlist-note">This is a preview. One pattern loops, and each channel has its own lane. Placing several patterns along a timeline is on the roadmap.</p>
       <div className="playlist-grid">
         <div className="playlist-corner" aria-hidden="true" />
         <div
@@ -134,12 +185,16 @@ export function Playlist() {
           }}
         >
           {Array.from({ length: bars }, (_, i) => (
-            <span key={i} className="ruler-bar" style={{ left: `${(i / bars) * 100}%` }}>{i + 1}</span>
+            <span key={i} className="ruler-bar" style={{ left: `${(i / bars) * 100}%` }}>
+              {i + 1}
+            </span>
           ))}
         </div>
         <ul className="playlist-lanes" aria-label="Channels in the pattern">
           {project.channels.map((c) => (
-            <li key={c.id} className="lane-name" style={{ '--ch': `var(--${c.color})` } as React.CSSProperties}>{c.name}</li>
+            <li key={c.id} className="lane-name" style={{ '--ch': `var(--${c.color})` } as React.CSSProperties}>
+              {c.name}
+            </li>
           ))}
         </ul>
         <div className="playlist-area" ref={area} aria-hidden="true">
@@ -150,4 +205,3 @@ export function Playlist() {
     </div>
   );
 }
-

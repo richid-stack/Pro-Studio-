@@ -1,0 +1,101 @@
+/* Panel toolbars: icon tools in the title bar. The outline lights up in the tool's own colour (the look follows butterDAWg). */
+@layer components {
+  .tool-bar {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+  .tool-group {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+    padding-left: var(--space-2);
+    border-left: var(--border-width) solid var(--border-subtle);
+  }
+  .tool-bar > :first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .tool-btn {
+    --hue: var(--text-primary);
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    min-width: var(--control-h-sm);
+    height: var(--control-h-sm);
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition:
+      outline-color var(--duration-fast) var(--ease-standard),
+      outline-offset var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard);
+  }
+  .tool-btn[data-labeled] {
+    padding: 0 var(--space-2);
+    font-size: var(--text-xs);
+  }
+  .tool-btn[data-hue='draw'] {
+    --hue: var(--tool-draw);
+  }
+  .tool-btn[data-hue='select'] {
+    --hue: var(--tool-select);
+  }
+  .tool-btn[data-hue='erase'] {
+    --hue: var(--tool-erase);
+  }
+  .tool-btn[data-hue='mute'] {
+    --hue: var(--tool-mute);
+  }
+  .tool-btn[data-hue='snap'] {
+    --hue: var(--tool-snap);
+  }
+  .tool-btn:hover:not(:disabled),
+  .tool-btn:focus-visible {
+    color: var(--hue);
+    outline-color: var(--hue);
+    outline-offset: 0;
+  }
+  /* on state: the colour stays, and the button is filled, so it never relies on colour alone */
+  .tool-btn[aria-pressed='true'] {
+    background: color-mix(in srgb, var(--hue) 20%, transparent);
+    color: var(--hue);
+    outline-color: var(--hue);
+    outline-offset: 0;
+  }
+  .tool-btn:disabled {
+    color: var(--text-disabled);
+  }
+  .tool-btn .icon {
+    flex: none;
+  }
+
+  /* a select or field that sits in a toolbar keeps the toolbar's height */
+  .tool-bar .select {
+    height: var(--control-h-sm);
+  }
+  .tool-icon {
+    display: inline-grid;
+    place-items: center;
+    color: var(--tool-snap);
+  }
+}
+
+@layer components {
+  /* a button with a word beside its icon, such as "Add channel" */
+  .tool-btn-text {
+    padding: 0 var(--space-2);
+    border: var(--border-width) solid var(--border-control);
+    font-size: var(--text-xs);
+  }
+}

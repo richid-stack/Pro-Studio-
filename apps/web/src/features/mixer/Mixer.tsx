@@ -1,8 +1,10 @@
 import { memo } from 'react';
-import { formatDb, formatPan, isFeatureVisible, setMasterDb, setMix, type Channel } from '@pro-studio/shared';
+import { createPortal } from 'react-dom';
+import { clearSolo, formatDb, formatPan, isFeatureVisible, setMasterDb, setMix, unmuteAll, type Channel } from '@pro-studio/shared';
 import { Fader } from '../../components/Fader';
 import { Knob } from '../../components/Knob';
 import { Meter } from '../../components/Meter';
+import { ToolButton, ToolGroup, Toolbar } from '../../components/Toolbar';
 import { DEFAULT_CHANNEL_DB, channelColor } from '../../lib/channels';
 import { studio, useProject } from '../../state/studio';
 import { uiState, useUi } from '../../state/ui';
@@ -21,9 +23,18 @@ const Strip = memo(function Strip({ channel, selected, sends }: { channel: Chann
       </button>
       {sends && (
         <div className="strip-sends">
-          <div className="send"><span aria-hidden="true">Rev</span><Knob size="sm" label={`${channel.name} reverb send`} value={m.rev} min={0} max={1} step={0.01} defaultValue={0} format={pct} color={color} onChange={(v) => set({ rev: v }, 'rev')} /></div>
-          <div className="send"><span aria-hidden="true">Dly</span><Knob size="sm" label={`${channel.name} delay send`} value={m.dly} min={0} max={1} step={0.01} defaultValue={0} format={pct} color={color} onChange={(v) => set({ dly: v }, 'dly')} /></div>
-          <div className="send"><span aria-hidden="true">Duck</span><Knob size="sm" label={`${channel.name} duck amount`} value={m.duck} min={0} max={1} step={0.01} defaultValue={0} format={pct} color={color} onChange={(v) => set({ duck: v }, 'duck')} /></div>
+          <div className="send">
+            <span aria-hidden="true">Rev</span>
+            <Knob size="sm" label={`${channel.name} reverb send`} value={m.rev} min={0} max={1} step={0.01} defaultValue={0} format={pct} color={color} onChange={(v) => set({ rev: v }, 'rev')} />
+          </div>
+          <div className="send">
+            <span aria-hidden="true">Dly</span>
+            <Knob size="sm" label={`${channel.name} delay send`} value={m.dly} min={0} max={1} step={0.01} defaultValue={0} format={pct} color={color} onChange={(v) => set({ dly: v }, 'dly')} />
+          </div>
+          <div className="send">
+            <span aria-hidden="true">Duck</span>
+            <Knob size="sm" label={`${channel.name} duck amount`} value={m.duck} min={0} max={1} step={0.01} defaultValue={0} format={pct} color={color} onChange={(v) => set({ duck: v }, 'duck')} />
+          </div>
         </div>
       )}
       <Knob label={`${channel.name} pan`} value={m.pan} min={-1} max={1} step={0.05} defaultValue={0} format={formatPan} bipolar color={color} onChange={(v) => set({ pan: v }, 'pan')} />
@@ -33,20 +44,56 @@ const Strip = memo(function Strip({ channel, selected, sends }: { channel: Chann
       </div>
       <output className="strip-db">{formatDb(m.db)}</output>
       <div className="strip-buttons">
-        <button type="button" className="btn btn-toggle" data-kind="mute" aria-pressed={m.mute} aria-label={`Mute ${channel.name}`} onClick={() => set({ mute: !m.mute }, 'mute')}>M</button>
-        <button type="button" className="btn btn-toggle" data-kind="solo" aria-pressed={m.solo} aria-label={`Solo ${channel.name}`} onClick={() => set({ solo: !m.solo }, 'solo')}>S</button>
+        <button type="button" className="btn btn-toggle" data-kind="mute" aria-pressed={m.mute} aria-label={`Mute ${channel.name}`} onClick={() => set({ mute: !m.mute }, 'mute')}>
+          M
+        </button>
+        <button type="button" className="btn btn-toggle" data-kind="solo" aria-pressed={m.solo} aria-label={`Solo ${channel.name}`} onClick={() => set({ solo: !m.solo }, 'solo')}>
+          S
+        </button>
       </div>
     </div>
   );
 });
 
-export function Mixer() {
+export function Mixer({ toolsHost }: { toolsHost: HTMLElement | null }) {
   const project = useProject();
   const selected = useUi((s) => s.selectedChannelId);
   const { mode } = usePreferences();
   const sends = isFeatureVisible('mixer-sends', mode);
+  const anyMuted = project.channels.some((c) => c.mix.mute);
+  const anySolo = project.channels.some((c) => c.mix.solo);
+  const toolbar = (
+    <Toolbar label="Mixer tools" className="mixer-toolbar">
+      <ToolGroup label="Mute and solo">
+        <ToolButton
+          icon="mute"
+          label="Unmute all"
+          hint="Unmute every channel"
+          hue="mute"
+          disabled={!anyMuted}
+          onClick={() => {
+            studio.edit(unmuteAll);
+            uiState.announce('Every channel is unmuted.');
+          }}
+        />
+        <ToolButton
+          icon="solo"
+          label="Clear solo"
+          hint="Take every channel out of solo"
+          hue="snap"
+          disabled={!anySolo}
+          onClick={() => {
+            studio.edit(clearSolo);
+            uiState.announce('Solo cleared.');
+          }}
+        />
+      </ToolGroup>
+      <span className="muted mixer-hint">{project.channels.length} strips and master</span>
+    </Toolbar>
+  );
   return (
-    <div className="mixer">
+    <div className="mixer" data-header-tools={toolsHost ? '' : undefined}>
+      {toolsHost ? createPortal(toolbar, toolsHost) : <div className="mixer-bar">{toolbar}</div>}
       <div className="mixer-strips">
         {project.channels.map((c) => (
           <Strip key={c.id} channel={c} selected={c.id === selected} sends={sends} />

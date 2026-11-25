@@ -191,7 +191,7 @@ test.describe('piano roll and the experience modes', () => {
     await openApp(page);
     await selectChannel(page, 'Kick');
     await expect(page.locator('.roll .empty')).toContainText('Drum channels use the step grid');
-    const options = page.locator('.roll-tools-slot select').first().locator('option:not([disabled])');
+    const options = page.locator('.panel-tools-slot select').first().locator('option:not([disabled])');
     await expect(options).toContainText(['808', 'Keys']);
   });
 

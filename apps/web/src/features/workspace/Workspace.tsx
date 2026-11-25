@@ -1,7 +1,26 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import {
-  DEFAULT_FLOAT, MAX_BROWSER_W, MIN_BROWSER_W, MIN_MIXER_H, MIN_RACK_W, MIN_ROLL_H, MIN_TOP_H, MIN_PLAYLIST_W, PANEL_LABELS, SPLITTER, clampRect, fitFloating, fitLayout,
-  isFeatureVisible, visibleFloating, MIN_FLOAT, type Bounds, type PanelId, type WindowRect, type WorkspaceLayout,
+  DEFAULT_FLOAT,
+  PANELS,
+  MAX_BROWSER_W,
+  MIN_BROWSER_W,
+  MIN_MIXER_H,
+  MIN_RACK_W,
+  MIN_ROLL_H,
+  MIN_TOP_H,
+  MIN_PLAYLIST_W,
+  PANEL_LABELS,
+  SPLITTER,
+  clampRect,
+  fitFloating,
+  fitLayout,
+  isFeatureVisible,
+  visibleFloating,
+  MIN_FLOAT,
+  type Bounds,
+  type PanelId,
+  type WindowRect,
+  type WorkspaceLayout,
 } from '@pro-studio/shared';
 import { FloatingWindow } from '../../components/FloatingWindow';
 import { PanelFrame } from '../../components/PanelFrame';
@@ -62,7 +81,10 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
   const windowRects = fitFloating(layout, bounds).floating;
 
   // the roll's tools live in its header, as in other DAWs; the roll renders into this slot (see PianoRoll's toolsHost)
-  const [rollTools, setRollTools] = useState<HTMLElement | null>(null);
+  // each panel's tools live in its title bar, as in other DAWs; a panel renders its toolbar into its slot (its `toolsHost`)
+  const [toolHosts, setToolHosts] = useState<Partial<Record<PanelId, HTMLElement | null>>>({});
+  const slotRef = useMemo(() => Object.fromEntries(PANELS.map((id) => [id, (el: HTMLElement | null) => setToolHosts((h) => (h[id] === el ? h : { ...h, [id]: el }))])) as Record<PanelId, (el: HTMLElement | null) => void>, []);
+  const toolSlot = (id: PanelId): ReactNode => <div className="panel-tools-slot" ref={slotRef[id]} />;
 
   /**
    * The rect a docked panel takes when it becomes a window: the panel's usual window size, placed just below and right
@@ -82,7 +104,12 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
     // keep a pop-out fully inside the box; a dragged-out window follows the pointer wherever it is
     return pointer
       ? { x, y, w, h }
-      : { x: Math.max(0, Math.min(x, bounds.width - w)), y: Math.max(0, Math.min(y, bounds.height - h)), w, h };
+      : {
+          x: Math.max(0, Math.min(x, bounds.width - w)),
+          y: Math.max(0, Math.min(y, bounds.height - h)),
+          w,
+          h,
+        };
   };
   const popOut = (id: PanelId): void => {
     workspaceLayout.float(id, windowRectFor(id));
@@ -100,7 +127,7 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
       canMaximize={canDock}
       onToggleMaximize={() => workspaceLayout.maximize(maximized === id ? null : id)}
       badge={badge}
-      tools={id === 'roll' && !isMobile ? <div className="roll-tools-slot" ref={setRollTools} /> : undefined}
+      tools={isMobile ? undefined : toolSlot(id)}
       onFloat={canFloat && !maximized ? () => popOut(id) : undefined}
       onDetach={canFloat && !maximized ? (pointer) => detach(id, pointer) : undefined}
     >
@@ -108,12 +135,13 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
     </PanelFrame>
   );
 
+  const host = (id: PanelId): HTMLElement | null => (isMobile ? null : (toolHosts[id] ?? null));
   const bodies: Record<PanelId, ReactNode> = {
-    browser: <Browser />,
-    rack: <ChannelRack isMobile={isMobile} />,
-    roll: <PianoRoll isMobile={isMobile} toolsHost={isMobile ? null : rollTools} />,
-    playlist: <Playlist />,
-    mixer: <Mixer />,
+    browser: <Browser toolsHost={host('browser')} />,
+    rack: <ChannelRack isMobile={isMobile} toolsHost={host('rack')} />,
+    roll: <PianoRoll isMobile={isMobile} toolsHost={host('roll')} />,
+    playlist: <Playlist toolsHost={host('playlist')} />,
+    mixer: <Mixer toolsHost={host('mixer')} />,
   };
   const badges: Partial<Record<PanelId, string>> = { playlist: 'Preview' };
 
@@ -127,8 +155,12 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
         <div className="mobile-panel">
           {current === 'keys' ? (
             <section className="panel" data-panel="keys" aria-label="Keys">
-              <header className="panel-header"><h2 className="panel-title">Keys</h2></header>
-              <div className="panel-body"><KeysDock /></div>
+              <header className="panel-header">
+                <h2 className="panel-title">Keys</h2>
+              </header>
+              <div className="panel-body">
+                <KeysDock />
+              </div>
             </section>
           ) : (
             frame(current, bodies[current], badges[current])
@@ -187,22 +219,35 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
         stage.push(
           <div key="top" className="stage-top" style={{ gridTemplateColumns: topCols }}>
             {showRack && frame('rack', bodies.rack)}
-            {showRack && showPlaylist && (
-              <Splitter orientation="vertical" label="Resize the channel rack" value={fitted.rackW} min={MIN_RACK_W} max={size.width - fitted.browserW - MIN_PLAYLIST_W} onChange={(v) => workspaceLayout.resize({ rackW: v })} />
-            )}
+            {showRack && showPlaylist && <Splitter orientation="vertical" label="Resize the channel rack" value={fitted.rackW} min={MIN_RACK_W} max={size.width - fitted.browserW - MIN_PLAYLIST_W} onChange={(v) => workspaceLayout.resize({ rackW: v })} />}
             {showPlaylist && frame('playlist', bodies.playlist, badges.playlist)}
           </div>,
         );
-      } else if (r === 'roll') stage.push(<div key="roll" className="stage-cell">{frame('roll', bodies.roll)}</div>);
-      else stage.push(<div key="mixer" className="stage-cell">{frame('mixer', bodies.mixer)}</div>);
+      } else if (r === 'roll')
+        stage.push(
+          <div key="roll" className="stage-cell">
+            {frame('roll', bodies.roll)}
+          </div>,
+        );
+      else
+        stage.push(
+          <div key="mixer" className="stage-cell">
+            {frame('mixer', bodies.mixer)}
+          </div>,
+        );
     });
 
     content = (
-      <div className="workspace" style={{ gridTemplateColumns: showBrowser ? `${fitted.browserW}px ${SPLITTER}px minmax(0, 1fr)` : 'minmax(0, 1fr)' } as CSSProperties}>
+      <div
+        className="workspace"
+        style={
+          {
+            gridTemplateColumns: showBrowser ? `${fitted.browserW}px ${SPLITTER}px minmax(0, 1fr)` : 'minmax(0, 1fr)',
+          } as CSSProperties
+        }
+      >
         {showBrowser && frame('browser', bodies.browser)}
-        {showBrowser && (
-          <Splitter orientation="vertical" label="Resize the browser" value={fitted.browserW} min={MIN_BROWSER_W} max={MAX_BROWSER_W} onChange={(v) => workspaceLayout.resize({ browserW: v })} />
-        )}
+        {showBrowser && <Splitter orientation="vertical" label="Resize the browser" value={fitted.browserW} min={MIN_BROWSER_W} max={MAX_BROWSER_W} onChange={(v) => workspaceLayout.resize({ browserW: v })} />}
         <div className="stage" style={{ gridTemplateRows: stageRows.join(' ') }}>
           {stage}
           {rows.length === 0 && floatIds.length === 0 && <p className="empty">Every panel is hidden. Use the View menu to show one.</p>}
@@ -225,7 +270,7 @@ export function Workspace({ isMobile }: { isMobile: boolean }) {
         folded={layout.folded.includes(id)}
         canMaximize={canDock}
         badge={badges[id]}
-        tools={id === 'roll' ? <div className="roll-tools-slot" ref={setRollTools} /> : undefined}
+        tools={toolSlot(id)}
         onCommit={(r) => workspaceLayout.setRect(id, r)}
         onRaise={() => workspaceLayout.raise(id)}
         onFold={(f) => {

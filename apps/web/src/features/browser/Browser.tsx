@@ -1,10 +1,9 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useId, useMemo, useRef, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent } from 'react';
-import {
-  BROWSER_TABS, availableTags, buildBrowserTree, countLeaves, flattenVisible, isBrowserTab, isFeatureVisible, isFiltering, isStarrable, treeNav,
-  typeahead, type BrowserRow, type BrowserTab, type TreeKey,
-} from '@pro-studio/shared';
+import { BROWSER_TABS, availableTags, buildBrowserTree, countLeaves, flattenVisible, isBrowserTab, isFeatureVisible, isFiltering, isStarrable, treeNav, typeahead, type BrowserRow, type BrowserTab, type TreeKey } from '@pro-studio/shared';
 import { audition } from '../../audio/audition';
 import { Icon, type IconName } from '../../components/Icon';
+import { ToolButton, ToolGroup, Toolbar } from '../../components/Toolbar';
 import { browserState, useBrowser } from '../../state/browser';
 import { useStore } from '../../state/store';
 import { studio } from '../../state/studio';
@@ -23,7 +22,7 @@ function iconFor(row: BrowserRow): IconName {
  * The browser: a tree of the project's channels, the sound library and the starter beats. Click previews a
  * sound, double-click (or Enter) adds it, and a sound can be dragged onto the channel rack.
  */
-export function Browser() {
+export function Browser({ toolsHost }: { toolsHost: HTMLElement | null }) {
   const channels = useStore(studio.store, (h) => h.present.channels);
   const tab = useBrowser((s) => s.tab);
   const text = useBrowser((s) => s.text);
@@ -138,6 +137,15 @@ export function Browser() {
           ? 'This project has no channels yet. Add a sound from the Sounds tab.'
           : 'Nothing to show.';
 
+  const toolbar = (
+    <Toolbar label="Browser tools" className="browser-toolbar">
+      <ToolGroup label="Browser">
+        <ToolButton icon="speaker" label="Preview sounds when selected" hint="Preview a sound when you click it or move to it with the arrow keys" hue="snap" pressed={autoPreview} onClick={() => browserState.set({ autoPreview: !autoPreview })} />
+        <ToolButton icon="collapse" label="Collapse all folders" onClick={() => browserState.collapseAll()} />
+      </ToolGroup>
+    </Toolbar>
+  );
+
   return (
     <div className="browser">
       <div className="tabs" role="tablist" aria-label="Browser sections">
@@ -167,6 +175,7 @@ export function Browser() {
         ))}
       </div>
 
+      {toolsHost && createPortal(toolbar, toolsHost)}
       <div className="browser-tools">
         <div className="search">
           <Icon name="search" size="sm" />
@@ -192,19 +201,7 @@ export function Browser() {
             </button>
           )}
         </div>
-        <button
-          type="button"
-          className="icon-btn"
-          aria-pressed={autoPreview}
-          aria-label="Preview sounds when selected"
-          title="Preview a sound when you click it or move to it with the arrow keys"
-          onClick={() => browserState.set({ autoPreview: !autoPreview })}
-        >
-          <Icon name="speaker" />
-        </button>
-        <button type="button" className="icon-btn" aria-label="Collapse all folders" title="Collapse all folders" onClick={() => browserState.collapseAll()}>
-          <Icon name="collapse" />
-        </button>
+        {!toolsHost && toolbar}
       </div>
 
       {showTags && tagChoices.length > 0 && (
@@ -217,9 +214,7 @@ export function Browser() {
         </div>
       )}
 
-      {showHelp && (
-        <p className="browser-help">Click a sound to hear it. Double-click it, or press Enter, to add it to your beat. You can also drag it onto the channel rack.</p>
-      )}
+      {showHelp && <p className="browser-help">Click a sound to hear it. Double-click it, or press Enter, to add it to your beat. You can also drag it onto the channel rack.</p>}
 
       <div className="browser-body" role="tabpanel" id={`${base}-panel`} aria-labelledby={`${base}-${tab}`}>
         {rows.length === 0 ? (
@@ -272,9 +267,15 @@ export function Browser() {
                   </span>
                   <span className="tree-label">{node.label}</span>
                   {row.expandable ? (
-                    <span className="tree-count" aria-hidden="true">{countLeaves(node)}</span>
+                    <span className="tree-count" aria-hidden="true">
+                      {countLeaves(node)}
+                    </span>
                   ) : (
-                    node.hint && <span className="tree-hint" aria-hidden="true">{node.hint}</span>
+                    node.hint && (
+                      <span className="tree-hint" aria-hidden="true">
+                        {node.hint}
+                      </span>
+                    )
                   )}
                   {leaf && leaf.kind !== 'channel' && (
                     <span className="tree-actions">

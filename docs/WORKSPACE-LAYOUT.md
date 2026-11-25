@@ -40,6 +40,16 @@ Keyboard: focus a window's title and use the arrow keys to move it 16 px, Shift+
 
 A floating panel takes no room in the dock, so the docked panels reflow to fill it. Window positions are saved with the layout, are pulled back inside the workspace if the browser window gets smaller (the saved place is kept, so making the window bigger again restores it), and are never part of the project. Switching to a layout preset docks everything.
 
+## Toolbars
+
+Each panel's tools live in its title bar (see `docs/DESIGN-SYSTEM.md`, Panel toolbars). The Workspace gives every panel a slot in its header and the panel portals its toolbar into it, so the same toolbar works docked, floating and maximized. Where the panel is too narrow for its tools beside the title, they take a row of their own and wrap. The phone layout has no slot, so the toolbar renders inline above the panel.
+
+- **Piano roll:** channel, draw, select, erase and pan tools; snap with its grid, quantize, slide (808 only) and delete; time and pitch zoom; scale highlight and follow playhead.
+- **Channel rack:** add channel and the channel and step count.
+- **Mixer:** Unmute all and Clear solo (both undoable project edits; each is disabled when it has nothing to do).
+- **Browser:** preview-on-select and collapse all folders.
+- **Playlist:** draw, paint, delete, mute, slice, select and snap. These are **previews**: they light up and say so, and place nothing until clips arrive in Phase 3.
+
 ## What is ours
 
 - **Visual identity.** Our own tokens, type and icons, with the "hardware panel on a desk" language taken from the owner's butterDAWg (see `docs/DESIGN-SYSTEM.md`, Provenance). We do not reproduce another product's skin, icon set, logo or artwork, and we do not use its trademarks in the UI.

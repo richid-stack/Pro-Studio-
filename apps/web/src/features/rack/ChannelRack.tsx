@@ -1,10 +1,9 @@
+import { createPortal } from 'react-dom';
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type PointerEvent } from 'react';
-import {
-  SOUND_LIBRARY, STEP_TICKS, clearChannel, speakDb, formatPan, gridMove, isFeatureVisible,
-  moveChannel, removeChannel, renameChannel, setMix, toggleStep, totalSteps, type Channel, type DrumChannel,
-} from '@pro-studio/shared';
+import { SOUND_LIBRARY, STEP_TICKS, clearChannel, speakDb, formatPan, gridMove, isFeatureVisible, moveChannel, removeChannel, renameChannel, setMix, toggleStep, totalSteps, type Channel, type DrumChannel } from '@pro-studio/shared';
 import { audioHost } from '../../audio/audioHost';
 import { Icon } from '../../components/Icon';
+import { ToolGroup, Toolbar } from '../../components/Toolbar';
 import { Knob } from '../../components/Knob';
 import { MenuButton, type MenuItem } from '../../components/Menu';
 import { SOUND_DRAG_TYPE, addSound, soundById } from '../browser/actions';
@@ -86,8 +85,16 @@ const RackRow = memo(function RackRow({ channel, row, steps, selected, canEditSt
   const menu: MenuItem[] = [
     { label: 'Rename', onSelect: () => setRenaming(true) },
     ...(drum ? ([{ label: 'Clear steps', onSelect: () => studio.edit((p) => clearChannel(p, channel.id)) }] as MenuItem[]) : []),
-    { label: 'Move up', disabled: row === 0, onSelect: () => studio.edit((p) => moveChannel(p, channel.id, row - 1)) },
-    { label: 'Move down', disabled: last, onSelect: () => studio.edit((p) => moveChannel(p, channel.id, row + 1)) },
+    {
+      label: 'Move up',
+      disabled: row === 0,
+      onSelect: () => studio.edit((p) => moveChannel(p, channel.id, row - 1)),
+    },
+    {
+      label: 'Move down',
+      disabled: last,
+      onSelect: () => studio.edit((p) => moveChannel(p, channel.id, row + 1)),
+    },
     { separator: true },
     {
       label: 'Delete channel',
@@ -101,14 +108,7 @@ const RackRow = memo(function RackRow({ channel, row, steps, selected, canEditSt
   return (
     <div className="rack-row" role="group" aria-label={channel.name} data-selected={selected || undefined} data-muted={channel.mix.mute || undefined} style={{ '--ch': color } as React.CSSProperties}>
       <div className="rack-head">
-        <button
-          type="button"
-          className="led"
-          aria-pressed={channel.mix.mute}
-          aria-label={`Mute ${channel.name}`}
-          title={channel.mix.mute ? `Unmute ${channel.name}` : `Mute ${channel.name}`}
-          onClick={() => studio.edit((p) => setMix(p, channel.id, { mute: !channel.mix.mute }))}
-        />
+        <button type="button" className="led" aria-pressed={channel.mix.mute} aria-label={`Mute ${channel.name}`} title={channel.mix.mute ? `Unmute ${channel.name}` : `Mute ${channel.name}`} onClick={() => studio.edit((p) => setMix(p, channel.id, { mute: !channel.mix.mute }))} />
         {renaming ? (
           <input
             className="rename"
@@ -144,10 +144,8 @@ const RackRow = memo(function RackRow({ channel, row, steps, selected, canEditSt
             {channel.name}
           </button>
         )}
-        <Knob label={`${channel.name} volume`} value={channel.mix.db} min={-60} max={6} step={0.5} defaultValue={DEFAULT_CHANNEL_DB} format={speakDb} color={color} size="sm"
-          onChange={(v) => studio.edit((p) => setMix(p, channel.id, { db: v }), { key: `db:${channel.id}` })} />
-        <Knob label={`${channel.name} pan`} value={channel.mix.pan} min={-1} max={1} step={0.05} defaultValue={0} format={formatPan} bipolar color={color} size="sm"
-          onChange={(v) => studio.edit((p) => setMix(p, channel.id, { pan: v }), { key: `pan:${channel.id}` })} />
+        <Knob label={`${channel.name} volume`} value={channel.mix.db} min={-60} max={6} step={0.5} defaultValue={DEFAULT_CHANNEL_DB} format={speakDb} color={color} size="sm" onChange={(v) => studio.edit((p) => setMix(p, channel.id, { db: v }), { key: `db:${channel.id}` })} />
+        <Knob label={`${channel.name} pan`} value={channel.mix.pan} min={-1} max={1} step={0.05} defaultValue={0} format={formatPan} bipolar color={color} size="sm" onChange={(v) => studio.edit((p) => setMix(p, channel.id, { pan: v }), { key: `pan:${channel.id}` })} />
         <MenuButton label={`${channel.name} options`} className="icon-btn" items={menu} align="end" />
       </div>
 
@@ -182,7 +180,14 @@ const RackRow = memo(function RackRow({ channel, row, steps, selected, canEditSt
           })}
         </div>
       ) : (
-        <InstrumentSummary channel={channel} steps={steps} onOpen={() => { uiState.selectChannel(channel.id); if (isMobile) uiState.setMobilePanel('roll'); }} />
+        <InstrumentSummary
+          channel={channel}
+          steps={steps}
+          onOpen={() => {
+            uiState.selectChannel(channel.id);
+            if (isMobile) uiState.setMobilePanel('roll');
+          }}
+        />
       )}
     </div>
   );
@@ -194,14 +199,22 @@ function InstrumentSummary({ channel, steps, onOpen }: { channel: Channel; steps
   return (
     <button type="button" className="rack-notes" onClick={onOpen} aria-label={`${channel.name}: ${channel.notes.length} notes. Open in the piano roll.`} title="Edit these notes in the piano roll" style={{ '--steps': steps } as React.CSSProperties}>
       {channel.notes.map((n) => (
-        <span key={n.id} className="rack-note" style={{ left: `calc(${n.t} * var(--step-w))`, width: `calc(${n.d} * var(--step-w))`, opacity: 0.45 + n.v * 0.55 }} />
+        <span
+          key={n.id}
+          className="rack-note"
+          style={{
+            left: `calc(${n.t} * var(--step-w))`,
+            width: `calc(${n.d} * var(--step-w))`,
+            opacity: 0.45 + n.v * 0.55,
+          }}
+        />
       ))}
       {channel.notes.length === 0 && <span className="rack-notes-empty">No notes yet. Open the piano roll to add some.</span>}
     </button>
   );
 }
 
-export function ChannelRack({ isMobile }: { isMobile: boolean }) {
+export function ChannelRack({ isMobile, toolsHost }: { isMobile: boolean; toolsHost: HTMLElement | null }) {
   const project = useProject();
   const selectedId = useUi((s) => s.selectedChannelId);
   const { mode } = usePreferences();
@@ -242,6 +255,19 @@ export function ChannelRack({ isMobile }: { isMobile: boolean }) {
   };
 
   const adders: MenuItem[] = useMemo(() => SOUND_LIBRARY.map((s): MenuItem => ({ label: s.label, onSelect: () => addSound(s) })), []);
+  const toolbar = (
+    <Toolbar label="Channel rack tools" className="rack-toolbar">
+      <ToolGroup label="Add">
+        <MenuButton className="tool-btn tool-btn-text" items={adders} label="Add channel">
+          <Icon name="plus" size="sm" />
+          <span>Add channel</span>
+        </MenuButton>
+      </ToolGroup>
+      <span className="muted rack-hint">
+        {project.channels.length} channels, {steps} steps
+      </span>
+    </Toolbar>
+  );
 
   // a sound dragged from the browser is added when it is dropped anywhere on the rack
   const [dropping, setDropping] = useState(false);
@@ -252,6 +278,7 @@ export function ChannelRack({ isMobile }: { isMobile: boolean }) {
   return (
     <div
       className="rack"
+      data-header-tools={toolsHost ? '' : undefined}
       data-dropping={dropping || undefined}
       onDragOver={(e) => {
         if (!isSoundDrag(e)) return;
@@ -270,31 +297,13 @@ export function ChannelRack({ isMobile }: { isMobile: boolean }) {
         if (sound) addSound(sound);
       }}
     >
-      <div className="rack-bar">
-        <MenuButton className="btn" items={adders} label="Add channel">
-          <Icon name="plus" size="sm" />
-          <span>Add channel</span>
-        </MenuButton>
-        <span className="muted rack-hint">{project.channels.length} channels, {steps} steps</span>
-      </div>
+      {toolsHost ? createPortal(toolbar, toolsHost) : <div className="rack-bar">{toolbar}</div>}
       {/* Arrow-key movement between step buttons is handled once here; the buttons themselves are focusable. */}
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
       <div className="rack-scroll" onKeyDown={key}>
         <div className="rack-table" role="group" aria-label="Channel rack steps" ref={table} style={{ '--steps': steps } as React.CSSProperties}>
           {project.channels.map((c, i) => (
-            <RackRow
-              key={c.id}
-              channel={c}
-              row={i}
-              steps={steps}
-              selected={c.id === selectedId}
-              canEditSteps={canEditSteps}
-              isMobile={isMobile}
-              cell={cell}
-              onCell={onCell}
-              onOpenEditor={setEditor}
-              last={i === project.channels.length - 1}
-            />
+            <RackRow key={c.id} channel={c} row={i} steps={steps} selected={c.id === selectedId} canEditSteps={canEditSteps} isMobile={isMobile} cell={cell} onCell={onCell} onOpenEditor={setEditor} last={i === project.channels.length - 1} />
           ))}
           <div className="rack-playhead" aria-hidden="true" />
         </div>
@@ -304,4 +313,3 @@ export function ChannelRack({ isMobile }: { isMobile: boolean }) {
     </div>
   );
 }
-

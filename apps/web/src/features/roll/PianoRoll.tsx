@@ -1,14 +1,56 @@
 import { createPortal } from 'react-dom';
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import {
-  MODE_DEFAULTS, ROLL_MAX_ROW_H, ROLL_MIN_ROW_H, SNAP_OPTIONS, STEP_TICKS, addNote, applyGesture, beginDraw, beginMove, beginResize,
-  beginVelocity, centerOnPitch, clamp, deleteNotes, duplicateNotes, findChannel, formatPosition, hitTest, isFeatureVisible, midiName,
-  moveNotes, notesInRect, pitchSpan, pitchToY, quantizeNotes, resizeNotes, rollKeyAction, rowCount, setNoteSlide, setNoteVelocity,
-  snapToScale, stepToX, velocityBarsAt, velocityFromY, xToStep, yToPitch, zoomX, zoomY,
-  type InstrumentChannel, type Project, type Rect, type RollKeyAction, type RollCursor, type RollGesture, type RollView, type ScaleId,
+  MODE_DEFAULTS,
+  ROLL_MAX_ROW_H,
+  ROLL_MIN_ROW_H,
+  SNAP_OPTIONS,
+  STEP_TICKS,
+  addNote,
+  applyGesture,
+  beginDraw,
+  beginMove,
+  beginResize,
+  beginVelocity,
+  centerOnPitch,
+  clamp,
+  deleteNotes,
+  duplicateNotes,
+  findChannel,
+  formatPosition,
+  hitTest,
+  isFeatureVisible,
+  midiName,
+  moveNotes,
+  notesInRect,
+  pitchSpan,
+  pitchToY,
+  quantizeNotes,
+  resizeNotes,
+  rollKeyAction,
+  rowCount,
+  setNoteSlide,
+  setNoteVelocity,
+  snapToScale,
+  stepToX,
+  velocityBarsAt,
+  velocityFromY,
+  xToStep,
+  yToPitch,
+  zoomX,
+  zoomY,
+  type InstrumentChannel,
+  type Project,
+  type Rect,
+  type RollKeyAction,
+  type RollCursor,
+  type RollGesture,
+  type RollView,
+  type ScaleId,
 } from '@pro-studio/shared';
 import { audioHost } from '../../audio/audioHost';
 import { Icon, type IconName } from '../../components/Icon';
+import { ToolButton, ToolGroup, Toolbar, type ToolHue } from '../../components/Toolbar';
 import { channelColorValue, fitCanvas, lengthToken, readColors, type CanvasColors } from '../../lib/canvasTheme';
 import { pressNote, previewNote, releaseNote } from '../../state/piano';
 import { useHeldNotes } from '../../state/keys';
@@ -30,15 +72,43 @@ const MAX_FIT_STEP_W = 40;
 const ROW_FRACTION = 0.55;
 const DRAG_THRESHOLD_PX = 3;
 
+/** The colour each roll tool lights up in. */
+const TOOL_HUE: Readonly<Record<RollTool, ToolHue>> = {
+  draw: 'draw',
+  select: 'select',
+  erase: 'erase',
+  pan: 'plain',
+};
+
 const TOOLS: ReadonlyArray<{ id: RollTool; label: string; hint: string }> = [
-  { id: 'draw', label: 'Draw', hint: 'Draw: click to place a note, drag to set its length. Drag a note to move it.' },
-  { id: 'select', label: 'Select', hint: 'Select: drag a box around notes. Shift-click adds to the selection.' },
-  { id: 'erase', label: 'Erase', hint: 'Erase: click or drag over notes to delete them. Right-click also deletes.' },
+  {
+    id: 'draw',
+    label: 'Draw',
+    hint: 'Draw: click to place a note, drag to set its length. Drag a note to move it.',
+  },
+  {
+    id: 'select',
+    label: 'Select',
+    hint: 'Select: drag a box around notes. Shift-click adds to the selection.',
+  },
+  {
+    id: 'erase',
+    label: 'Erase',
+    hint: 'Erase: click or drag over notes to delete them. Right-click also deletes.',
+  },
   { id: 'pan', label: 'Pan', hint: 'Pan: drag to scroll. Use this on a touch screen.' },
 ];
 
 type Drag =
-  | { kind: 'gesture'; g: RollGesture; base: Project; key: string; from: { x: number; y: number }; moved: boolean; lastPitch: number }
+  | {
+      kind: 'gesture';
+      g: RollGesture;
+      base: Project;
+      key: string;
+      from: { x: number; y: number };
+      moved: boolean;
+      lastPitch: number;
+    }
   | { kind: 'marquee'; from: { x: number; y: number }; keep: ReadonlySet<number> }
   | { kind: 'erase'; key: string }
   | { kind: 'pan'; x: number; y: number; left: number; top: number }
@@ -82,8 +152,19 @@ interface Local {
 
 const INITIAL_LOCAL: Local = {
   view: { stepW: 16, rowH: 18, scrollX: 0, scrollY: 0 },
-  w: 0, h: 0, keysW: 0, rulerH: 0, laneH: 0, ready: false, centeredFor: null,
-  cursor: { step: 0, pitch: 60 }, marquee: null, focused: false, colors: null, fontPx: 11, seq: 0,
+  w: 0,
+  h: 0,
+  keysW: 0,
+  rulerH: 0,
+  laneH: 0,
+  ready: false,
+  centeredFor: null,
+  cursor: { step: 0, pitch: 60 },
+  marquee: null,
+  focused: false,
+  colors: null,
+  fontPx: 11,
+  seq: 0,
 };
 
 /** The piano roll: draw, select and erase notes on a pitch-by-time grid, with the keys to play them and a velocity lane. */
@@ -110,9 +191,20 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
 
   const live = useRef<Live>({} as Live);
   live.current = {
-    channel, selected, held, total: bars * 16, keyPc, scale, showScale, tool,
-    grid: snap === 'off' ? 0 : snapDef.steps, gridSteps: snapDef.steps,
-    scaleSnap: MODE_DEFAULTS[mode].scaleSnap, lane, follow, numeric: isFeatureVisible('numeric-readouts', mode),
+    channel,
+    selected,
+    held,
+    total: bars * 16,
+    keyPc,
+    scale,
+    showScale,
+    tool,
+    grid: snap === 'off' ? 0 : snapDef.steps,
+    gridSteps: snapDef.steps,
+    scaleSnap: MODE_DEFAULTS[mode].scaleSnap,
+    lane,
+    follow,
+    numeric: isFeatureVisible('numeric-readouts', mode),
   };
 
   const st = useRef<Local>({ ...INITIAL_LOCAL });
@@ -162,16 +254,52 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
     const gctx = gridCv.current ? fitCanvas(gridCv.current, s.w, s.h) : null;
     if (gctx) {
       paintGrid({
-        ctx: gctx, w: s.w, h: s.h, view: s.view, c, notes, selected: L.selected, color, total: L.total, keyPc: L.keyPc, scale: L.scale,
-        showScale: L.showScale, cursor: s.focused ? { ...s.cursor, w: L.gridSteps } : null, marquee: s.marquee, fontPx: s.fontPx,
+        ctx: gctx,
+        w: s.w,
+        h: s.h,
+        view: s.view,
+        c,
+        notes,
+        selected: L.selected,
+        color,
+        total: L.total,
+        keyPc: L.keyPc,
+        scale: L.scale,
+        showScale: L.showScale,
+        cursor: s.focused ? { ...s.cursor, w: L.gridSteps } : null,
+        marquee: s.marquee,
+        fontPx: s.fontPx,
       });
     }
     const rctx = rulerCv.current && s.rulerH > 0 ? fitCanvas(rulerCv.current, s.w, s.rulerH) : null;
     if (rctx) paintRuler({ ctx: rctx, w: s.w, h: s.rulerH, view: s.view, c }, L.total, s.fontPx);
     const kctx = keysCv.current && s.keysW > 0 ? fitCanvas(keysCv.current, s.keysW, s.h) : null;
-    if (kctx) paintKeys({ ctx: kctx, w: s.keysW, h: s.h, view: s.view, c, held: L.held, keyPc: L.keyPc, scale: L.scale, showScale: L.showScale, fontPx: s.fontPx });
+    if (kctx)
+      paintKeys({
+        ctx: kctx,
+        w: s.keysW,
+        h: s.h,
+        view: s.view,
+        c,
+        held: L.held,
+        keyPc: L.keyPc,
+        scale: L.scale,
+        showScale: L.showScale,
+        fontPx: s.fontPx,
+      });
     const lctx = laneCv.current && s.laneH > 0 ? fitCanvas(laneCv.current, s.w, s.laneH) : null;
-    if (lctx) paintLane({ ctx: lctx, w: s.w, h: s.laneH, view: s.view, c, notes, selected: L.selected, color, total: L.total });
+    if (lctx)
+      paintLane({
+        ctx: lctx,
+        w: s.w,
+        h: s.laneH,
+        view: s.view,
+        c,
+        notes,
+        selected: L.selected,
+        color,
+        total: L.total,
+      });
     paintHead();
   };
 
@@ -228,7 +356,12 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
     if (!s.ready && s.w > 0) {
       s.ready = true;
       const rowH = clamp(Math.round(lengthToken(host, '--row-h') * ROW_FRACTION), ROLL_MIN_ROW_H, ROLL_MAX_ROW_H);
-      s.view = { stepW: clamp(s.w / live.current.total, MIN_FIT_STEP_W, MAX_FIT_STEP_W), rowH, scrollX: 0, scrollY: 0 };
+      s.view = {
+        stepW: clamp(s.w / live.current.total, MIN_FIT_STEP_W, MAX_FIT_STEP_W),
+        rowH,
+        scrollX: 0,
+        scrollY: 0,
+      };
       s.centeredFor = null;
     }
     if (s.ready && s.centeredFor !== (live.current.channel?.id ?? '')) {
@@ -298,7 +431,10 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
     const r = el?.getBoundingClientRect();
     return { x: e.clientX - (r?.left ?? 0), y: e.clientY - (r?.top ?? 0) };
   };
-  const pointAt = (x: number, y: number): { step: number; pitch: number } => ({ step: xToStep(x, st.current.view), pitch: yToPitch(y, st.current.view) });
+  const pointAt = (x: number, y: number): { step: number; pitch: number } => ({
+    step: xToStep(x, st.current.view),
+    pitch: yToPitch(y, st.current.view),
+  });
   const select = (ids: Iterable<number>): void => {
     uiState.selectNotes(ids);
     fns.current.schedule();
@@ -352,7 +488,15 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
       if (!current.has(hit.id)) select(ids);
       const point = pointAt(x, y);
       const g = hit.zone === 'end' ? beginResize(ids, ch.id, point, L.grid) : beginMove(ids, ch.id, point, L.grid);
-      drag.current = { kind: 'gesture', g, base: studio.get(), key: gestureKey(), from: { x, y }, moved: false, lastPitch: point.pitch };
+      drag.current = {
+        kind: 'gesture',
+        g,
+        base: studio.get(),
+        key: gestureKey(),
+        from: { x, y },
+        moved: false,
+        lastPitch: point.pitch,
+      };
       const note = ch.notes.find((n) => n.id === hit.id);
       if (note) previewNote(ch.id, note.n, note.v, NOTE_PREVIEW_S);
       return;
@@ -367,12 +511,24 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
       edit(() => r.project, key);
       select([r.gesture.noteId]);
       previewNote(ch.id, pitch, DEFAULT_VELOCITY, NOTE_PREVIEW_S);
-      drag.current = { kind: 'gesture', g: r.gesture, base: r.project, key, from: { x, y }, moved: true, lastPitch: pitch };
+      drag.current = {
+        kind: 'gesture',
+        g: r.gesture,
+        base: r.project,
+        key,
+        from: { x, y },
+        moved: true,
+        lastPitch: pitch,
+      };
       return;
     }
     // select tool on empty space: start a box
     if (!additive) select([]);
-    drag.current = { kind: 'marquee', from: { x, y }, keep: additive ? new Set(uiState.get().selectedNotes) : new Set() };
+    drag.current = {
+      kind: 'marquee',
+      from: { x, y },
+      keep: additive ? new Set(uiState.get().selectedNotes) : new Set(),
+    };
     st.current.marquee = { x1: x, y1: y, x2: x, y2: y };
     fns.current.schedule();
   };
@@ -526,7 +682,13 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
           say(`Selected ${midiName(existing.n)} at ${formatPosition(existing.t)}. Press Delete to remove it.`);
           break;
         }
-        const r = addNote(studio.get(), ch.id, { t: act.at.step, d: L.gridSteps, n: act.at.pitch, v: DEFAULT_VELOCITY, s: false });
+        const r = addNote(studio.get(), ch.id, {
+          t: act.at.step,
+          d: L.gridSteps,
+          n: act.at.pitch,
+          v: DEFAULT_VELOCITY,
+          s: false,
+        });
         studio.edit(() => r.project);
         select([r.id]);
         previewNote(ch.id, act.at.pitch, DEFAULT_VELOCITY, NOTE_PREVIEW_S);
@@ -571,10 +733,7 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
         break;
       }
       case 'velocity':
-        studio.edit(
-          (p) => ch.notes.filter((n) => sel.has(n.id)).reduce((acc, n) => setNoteVelocity(acc, ch.id, new Set([n.id]), clamp(n.v + act.delta, 0.05, 1)), p),
-          { key: 'roll-key-velocity' },
-        );
+        studio.edit((p) => ch.notes.filter((n) => sel.has(n.id)).reduce((acc, n) => setNoteVelocity(acc, ch.id, new Set([n.id]), clamp(n.v + act.delta, 0.05, 1)), p), { key: 'roll-key-velocity' });
         break;
     }
   };
@@ -586,7 +745,12 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
     const sel = new Set([...uiState.get().selectedNotes].filter((id) => ch.notes.some((n) => n.id === id)));
     const act = rollKeyAction(
       { key: e.key, shift: e.shiftKey, mod: e.ctrlKey || e.metaKey, alt: e.altKey },
-      { cursor: st.current.cursor, grid: live.current.gridSteps, total: live.current.total, hasSelection: sel.size > 0 },
+      {
+        cursor: st.current.cursor,
+        grid: live.current.gridSteps,
+        total: live.current.total,
+        hasSelection: sel.size > 0,
+      },
     );
     if (!act) return; // not a roll key: the typing piano and the app's shortcuts get it
     e.preventDefault();
@@ -621,8 +785,17 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
 
   /* ------------------------------------------------------------ render */
 
+  const deleteSelected = (): void => {
+    const ch = channelNow();
+    if (!ch || selectedInChannel.length === 0) return;
+    const ids = new Set(selectedInChannel.map((n) => n.id));
+    studio.edit((p) => deleteNotes(p, ch.id, ids));
+    select([]);
+    uiState.announce(`Deleted ${ids.size} ${ids.size === 1 ? 'note' : 'notes'}. Press Undo to bring ${ids.size === 1 ? 'it' : 'them'} back.`);
+  };
+
   const toolbar = (
-    <div className="roll-toolbar" role="toolbar" aria-label="Piano roll tools">
+    <Toolbar label="Piano roll tools" className="roll-toolbar">
       {instruments.length > 0 && (
         <label className="field-inline">
           <span className="visually-hidden">Channel to edit</span>
@@ -640,59 +813,47 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
           </select>
         </label>
       )}
-      <div className="roll-group" role="group" aria-label="Tool">
+      <ToolGroup label="Tool">
         {TOOLS.map((t) => (
-          <button key={t.id} type="button" className="icon-btn" aria-pressed={tool === t.id} aria-label={t.label} title={t.hint} onClick={() => uiState.setTool(t.id)}>
-            <Icon name={t.id as IconName} />
-          </button>
+          <ToolButton key={t.id} icon={t.id as IconName} label={t.label} hint={t.hint} hue={TOOL_HUE[t.id]} pressed={tool === t.id} onClick={() => uiState.setTool(t.id)} />
         ))}
-      </div>
-      <label className="field-inline">
-        <span className="field-label">Snap</span>
-        <select className="select" value={snap} onChange={(e) => uiState.setSnap(e.target.value as typeof snap)}>
-          {SNAP_OPTIONS.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </label>
-      <button type="button" className="btn" disabled={!channel || channel.notes.length === 0} onClick={quantize} title="Snap note starts to the grid. Applies to the selected notes, or to all of them when none are selected.">
-        Quantize
-      </button>
-      {canSlide && (
-        <button type="button" className="btn btn-chip" aria-pressed={allSlide} disabled={selectedInChannel.length === 0} onClick={toggleSlide} title="Slide: the selected notes glide in from the note before them.">
-          Slide
-        </button>
-      )}
-      <div className="roll-group" role="group" aria-label="Zoom">
-        <button type="button" className="icon-btn" aria-label="Zoom out time" title="Zoom out time (Ctrl and scroll)" onClick={() => zoom('time', 1 / 1.25)}>
-          <Icon name="minus" />
-        </button>
+      </ToolGroup>
+      <ToolGroup label="Snap and timing">
+        <label className="field-inline">
+          <span className="tool-icon" aria-hidden="true">
+            <Icon name="magnet" size="sm" />
+          </span>
+          <span className="visually-hidden">Snap</span>
+          <select className="select" value={snap} onChange={(e) => uiState.setSnap(e.target.value as typeof snap)}>
+            {SNAP_OPTIONS.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <ToolButton icon="quantize" label="Quantize" hint="Snap note starts to the grid. Applies to the selected notes, or to all of them when none are selected." hue="snap" disabled={!channel || channel.notes.length === 0} onClick={quantize} />
+        {canSlide && <ToolButton icon="slide" label="Slide" hint="Slide: the selected notes glide in from the note before them." hue="snap" pressed={allSlide} disabled={selectedInChannel.length === 0} onClick={toggleSlide} />}
+        <ToolButton icon="trash" label="Delete selected notes" hint="Delete the selected notes (Delete). Undo brings them back." hue="erase" disabled={selectedInChannel.length === 0} onClick={deleteSelected} />
+      </ToolGroup>
+      <ToolGroup label="Zoom">
+        <ToolButton icon="minus" label="Zoom out time" hint="Zoom out time (Ctrl and scroll)" onClick={() => zoom('time', 1 / 1.25)} />
         <Icon name="zoom-time" size="sm" />
-        <button type="button" className="icon-btn" aria-label="Zoom in time" title="Zoom in time (Ctrl and scroll)" onClick={() => zoom('time', 1.25)}>
-          <Icon name="plus" />
-        </button>
+        <ToolButton icon="plus" label="Zoom in time" hint="Zoom in time (Ctrl and scroll)" onClick={() => zoom('time', 1.25)} />
         {!isMobile && (
           <>
-            <button type="button" className="icon-btn" aria-label="Zoom out pitch" title="Fewer, shorter rows (Alt and scroll)" onClick={() => zoom('pitch', 1 / 1.25)}>
-              <Icon name="minus" />
-            </button>
+            <ToolButton icon="minus" label="Zoom out pitch" hint="Fewer, shorter rows (Alt and scroll)" onClick={() => zoom('pitch', 1 / 1.25)} />
             <Icon name="zoom-pitch" size="sm" />
-            <button type="button" className="icon-btn" aria-label="Zoom in pitch" title="Taller rows (Alt and scroll)" onClick={() => zoom('pitch', 1.25)}>
-              <Icon name="plus" />
-            </button>
+            <ToolButton icon="plus" label="Zoom in pitch" hint="Taller rows (Alt and scroll)" onClick={() => zoom('pitch', 1.25)} />
           </>
         )}
-      </div>
-      <button type="button" className="btn btn-chip" aria-pressed={showScale} onClick={() => setShowScale((v) => !v)} title="Dim the rows outside the project key and scale, and mark the key's notes on the keyboard.">
-        Scale
-      </button>
-      <button type="button" className="btn btn-chip" aria-pressed={follow} onClick={() => setFollow((v) => !v)} title="Scroll the roll to keep the playhead in view while playing.">
-        Follow
-      </button>
+      </ToolGroup>
+      <ToolGroup label="View">
+        <ToolButton icon="scale" label="Scale" hint="Dim the rows outside the project key and scale, and mark the key's notes on the keyboard." hue="snap" pressed={showScale} onClick={() => setShowScale((v) => !v)} />
+        <ToolButton icon="follow" label="Follow" hint="Scroll the roll to keep the playhead in view while playing." hue="snap" pressed={follow} onClick={() => setFollow((v) => !v)} />
+      </ToolGroup>
       <output ref={readout} className="roll-readout" aria-hidden="true" />
-    </div>
+    </Toolbar>
   );
 
   const hint = channel
@@ -705,7 +866,16 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
       {channel ? (
         <div className="roll-body" data-lane={lane ? 'on' : 'off'}>
           <div className="roll-corner" aria-hidden="true" />
-          <canvas ref={rulerCv} className="roll-ruler" aria-hidden="true" onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); seekTo(e); }} onPointerMove={(e) => e.buttons === 1 && seekTo(e)} />
+          <canvas
+            ref={rulerCv}
+            className="roll-ruler"
+            aria-hidden="true"
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture(e.pointerId);
+              seekTo(e);
+            }}
+            onPointerMove={(e) => e.buttons === 1 && seekTo(e)}
+          />
           <div className="roll-keys">
             <canvas ref={keysCv} aria-hidden="true" onPointerDown={onKeysDown} onPointerMove={onKeysMove} onPointerUp={onKeysUp} onPointerCancel={onKeysUp} />
           </div>
@@ -721,8 +891,14 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
             aria-label={`Notes, ${channel.name}`}
             aria-describedby={helpId}
             onKeyDown={onKeyDown}
-            onFocus={() => { st.current.focused = true; schedule(); }}
-            onBlur={() => { st.current.focused = false; schedule(); }}
+            onFocus={() => {
+              st.current.focused = true;
+              schedule();
+            }}
+            onBlur={() => {
+              st.current.focused = false;
+              schedule();
+            }}
             onScroll={(e) => {
               const el = e.currentTarget;
               st.current.view = { ...st.current.view, scrollX: el.scrollLeft, scrollY: el.scrollTop };
@@ -731,15 +907,7 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
           >
             <div className="roll-stage">
               <div ref={spacer} className="roll-spacer" />
-              <div
-                ref={viewEl}
-                className="roll-view"
-                onPointerDown={onGridDown}
-                onPointerMove={onGridMove}
-                onPointerUp={onGridUp}
-                onPointerCancel={onGridUp}
-                onContextMenu={(e) => e.preventDefault()}
-              >
+              <div ref={viewEl} className="roll-view" onPointerDown={onGridDown} onPointerMove={onGridMove} onPointerUp={onGridUp} onPointerCancel={onGridUp} onContextMenu={(e) => e.preventDefault()}>
                 <canvas ref={gridCv} aria-hidden="true" />
                 <div ref={headEl} className="roll-head" aria-hidden="true" />
               </div>
@@ -747,7 +915,9 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
           </div>
           {lane && (
             <>
-              <div className="roll-lane-label" aria-hidden="true">Velocity</div>
+              <div className="roll-lane-label" aria-hidden="true">
+                Velocity
+              </div>
               <div className="roll-lane">
                 <canvas ref={laneCv} aria-label="Velocity of each note. Drag a bar up or down." onPointerDown={onLaneDown} onPointerMove={onLaneMove} onPointerUp={onGridUp} onPointerCancel={onGridUp} />
               </div>
@@ -756,12 +926,12 @@ export function PianoRoll({ isMobile, toolsHost }: { isMobile: boolean; toolsHos
         </div>
       ) : (
         <div className="empty">
-          {instruments.length === 0
-            ? 'The piano roll edits instrument channels. Add one from the browser (Sub 808, Rhodes, Pluck, Pad or Organ) to write notes.'
-            : 'The piano roll edits instrument channels. Choose one above. Drum channels use the step grid in the channel rack.'}
+          {instruments.length === 0 ? 'The piano roll edits instrument channels. Add one from the browser (Sub 808, Rhodes, Pluck, Pad or Organ) to write notes.' : 'The piano roll edits instrument channels. Choose one above. Drum channels use the step grid in the channel rack.'}
         </div>
       )}
-      <p id={helpId} className="visually-hidden">{hint}</p>
+      <p id={helpId} className="visually-hidden">
+        {hint}
+      </p>
       {channel && (
         <ul className="visually-hidden" aria-label="Notes in this channel">
           {channel.notes.slice(0, 256).map((n) => (

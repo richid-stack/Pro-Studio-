@@ -22,18 +22,7 @@
     border-bottom: var(--border-width) solid var(--border-subtle);
   }
   /* in the panel header the toolbar loses its own row and scrolls sideways when the panel is narrow */
-  .roll-tools-slot {
-    display: flex;
-    flex: 1 1 0;
-    min-width: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .panel-tools:has(.roll-tools-slot) {
-    flex: 1 1 0;
-    margin-left: var(--space-3);
-  }
-  .roll-tools-slot .roll-toolbar {
+  .panel-tools-slot .roll-toolbar {
     flex: 1 0 auto;
     flex-wrap: nowrap;
     padding: 0;

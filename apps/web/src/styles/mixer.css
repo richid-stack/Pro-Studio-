@@ -6,6 +6,18 @@
     min-height: 0;
     min-width: 0;
   }
+  /* without a title-bar slot (a phone) the toolbar gets a row of its own above the strips */
+  .mixer:not([data-header-tools]) {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .mixer-bar {
+    grid-column: 1 / -1;
+    padding: var(--space-1) var(--space-2);
+    border-bottom: var(--border-width) solid var(--border-subtle);
+  }
+  .mixer-hint {
+    font-size: var(--text-xs);
+  }
   .mixer-strips {
     display: flex;
     min-width: 0;

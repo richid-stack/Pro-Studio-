@@ -75,12 +75,98 @@
     font-size: var(--text-xs);
     color: var(--text-muted);
   }
+  /* where a panel's toolbar lands in its title bar: it takes the room the title leaves and scrolls sideways when the panel is narrow */
+  .panel-tools-slot {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    /* room for the 2 px outline a lit tool draws, which scrolling would otherwise clip */
+    padding: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .panel-tools:has(.panel-tools-slot) {
+    flex: 1 1 0;
+    margin-left: var(--space-3);
+  }
+
+  /*
+   * A panel's width decides where its tools go. When the title bar cannot hold the tools beside the title and the window
+   * buttons, the tools drop to a row of their own under the title, so no tool is ever hidden behind a scroll. Each panel
+   * has its own threshold, about the width its tools need.
+   */
+  .panel {
+    container: panel / inline-size;
+  }
+  .panel-header {
+    flex-wrap: wrap;
+  }
+  .panel-header > .wbtn:first-of-type {
+    margin-left: auto;
+  }
+  @container panel (max-width: 60rem) {
+    .panel[data-panel='roll'] .panel-header .panel-tools {
+      order: 3;
+      flex: 1 1 100%;
+      margin: 0;
+      padding: 0 var(--space-2) var(--space-1) 0;
+    }
+  }
+  @container panel (max-width: 36rem) {
+    .panel[data-panel='playlist'] .panel-header .panel-tools {
+      order: 3;
+      flex: 1 1 100%;
+      margin: 0;
+      padding: 0 var(--space-2) var(--space-1) 0;
+    }
+  }
+  @container panel (max-width: 34rem) {
+    .panel[data-panel='rack'] .panel-header .panel-tools {
+      order: 3;
+      flex: 1 1 100%;
+      margin: 0;
+      padding: 0 var(--space-2) var(--space-1) 0;
+    }
+  }
+  @container panel (max-width: 30rem) {
+    .panel[data-panel='mixer'] .panel-header .panel-tools {
+      order: 3;
+      flex: 1 1 100%;
+      margin: 0;
+      padding: 0 var(--space-2) var(--space-1) 0;
+    }
+  }
   .panel-tools {
     display: flex;
     align-items: center;
     gap: var(--space-2);
     margin-left: auto;
     min-width: 0;
+  }
+  /* once the tools have a row of their own they wrap onto more rows instead of scrolling out of sight */
+  @container panel (max-width: 60rem) {
+    .panel[data-panel='roll'] .panel-tools-slot,
+    .panel[data-panel='roll'] .panel-tools-slot .tool-bar {
+      flex-wrap: wrap;
+    }
+  }
+  @container panel (max-width: 36rem) {
+    .panel[data-panel='playlist'] .panel-tools-slot,
+    .panel[data-panel='playlist'] .panel-tools-slot .tool-bar {
+      flex-wrap: wrap;
+    }
+  }
+  @container panel (max-width: 34rem) {
+    .panel[data-panel='rack'] .panel-tools-slot,
+    .panel[data-panel='rack'] .panel-tools-slot .tool-bar {
+      flex-wrap: wrap;
+    }
+  }
+  @container panel (max-width: 30rem) {
+    .panel[data-panel='mixer'] .panel-tools-slot,
+    .panel[data-panel='mixer'] .panel-tools-slot .tool-bar {
+      flex-wrap: wrap;
+    }
   }
   .panel-body {
     min-width: 0;

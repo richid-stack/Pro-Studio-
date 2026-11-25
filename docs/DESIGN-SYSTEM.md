@@ -46,7 +46,7 @@ Each mode sets a default density (`MODE_DEFAULTS` in `@pro-studio/shared`): Begi
 - 3:1 for control borders, the focus ring, meters, the playhead and every channel colour on the panel surfaces.
 - The light theme must redefine every colour token the dark theme does, so nothing silently inherits a dark value.
 
-Currently 114 pairs per theme pass (the chrome, lit-button, LED and record pairs came with Slate & Amber). Add a pair to the script when you add a token that carries meaning.
+Currently 134 pairs per theme pass (the chrome, lit-button, LED and record pairs came with Slate & Amber; the tool colours added 20). Add a pair to the script when you add a token that carries meaning.
 
 Other rules: one focus style for the whole product (`:focus-visible`, 2 px, `--focus-ring`); no status by colour alone (every meter and state also has a shape, label or position cue); every icon-only control has an accessible name.
 
@@ -56,8 +56,19 @@ Other rules: one focus style for the whole product (`:focus-visible`, 2 px, `--f
 
 - **Two tones.** Each icon is layers: `f` fill (full colour), `t` tint (same colour at `--icon-tone-opacity`), `l` line, `m` mark (small detail), `s` soft line. The tint gives the "keycap" depth without a second colour, so icons follow `currentColor` and work in both themes and on lit buttons.
 - **Sizes** are tokens: `--icon-sm` 16 px, `--icon-md` 20 px, `--icon-lg` 24 px. Stroke weights are set per layer so a small icon does not go muddy.
+- **Panel tool icons** added with the toolbars: `magnet` (snap), `quantize`, `slide`, `scale`, `follow`, `trash`, `mute`, `solo`, `slice`, `brush`. Each was drawn on the grid and checked on the contact sheet at all three sizes in both themes.
 - **Names** are a closed union (`IconName`); `ICON_NAMES` feeds the contact sheet used to review the set in both themes. Add an icon by drawing it on the grid, adding the name, and checking it on the sheet at all three sizes.
 - Icon-only controls still need an accessible name (the icon is `aria-hidden`).
+
+## Panel toolbars
+
+Every panel carries its tools as icons in its title bar (`components/Toolbar.tsx`: `Toolbar`, `ToolGroup`, `ToolButton`). The look follows butterDAWg: a quiet grey icon, and on hover, focus or when on, a 2 px outline and the icon in the tool's own colour.
+
+- **Tool colours** are tokens, `--tool-draw`, `--tool-select`, `--tool-erase`, `--tool-mute`, `--tool-snap`, with a pair per panel surface in the contrast gate. A tool picks one with `hue`; `plain` keeps the neutral colour.
+- **On is never colour alone:** a pressed tool is also filled and exposes `aria-pressed`. Every tool has an accessible name, and Beginner mode adds a text label beside the icon.
+- **A tool that is not built yet** is passed `preview`: it announces "is a preview and does nothing yet" and carries `data-preview="true"` (the playlist tools are the current case; see `docs/ROADMAP.md`).
+- **Narrow panels:** each panel is a container (`container: panel`). Below a per-panel width the tools drop to a second row of the title bar and wrap, so no tool is hidden behind a scroll. On a phone the toolbar is an inline row above the panel.
+- **Keyboard:** the toolbar is one `role="toolbar"`; Left and Right move between its buttons.
 
 ## Components (planned in `@pro-studio/ui`, Phase 1)
 
