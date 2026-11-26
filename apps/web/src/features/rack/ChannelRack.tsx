@@ -7,7 +7,7 @@ import { ToolGroup, Toolbar } from '../../components/Toolbar';
 import { Knob } from '../../components/Knob';
 import { MenuButton, type MenuItem } from '../../components/Menu';
 import { SOUND_DRAG_TYPE, addSound, soundById } from '../browser/actions';
-import { DEFAULT_CHANNEL_DB, channelColor, channelKind } from '../../lib/channels';
+import { DEFAULT_CHANNEL_DB, channelColor, channelIcon, channelKind, channelRole } from '../../lib/channels';
 import { studio, useProject } from '../../state/studio';
 import { uiState, useUi } from '../../state/ui';
 import { usePreferences } from '../../state/usePreferences';
@@ -108,7 +108,14 @@ const RackRow = memo(function RackRow({ channel, row, steps, selected, canEditSt
   return (
     <div className="rack-row" role="group" aria-label={channel.name} data-selected={selected || undefined} data-muted={channel.mix.mute || undefined} style={{ '--ch': color } as React.CSSProperties}>
       <div className="rack-head">
-        <button type="button" className="led" aria-pressed={channel.mix.mute} aria-label={`Mute ${channel.name}`} title={channel.mix.mute ? `Unmute ${channel.name}` : `Mute ${channel.name}`} onClick={() => studio.edit((p) => setMix(p, channel.id, { mute: !channel.mix.mute }))} />
+        <button type="button" className="led lamp" aria-pressed={channel.mix.mute} aria-label={`Mute ${channel.name}`} title={channel.mix.mute ? `Unmute ${channel.name}` : `Mute ${channel.name}`} onClick={() => studio.edit((p) => setMix(p, channel.id, { mute: !channel.mix.mute }))} />
+        <Knob label={`${channel.name} pan`} value={channel.mix.pan} min={-1} max={1} step={0.05} defaultValue={0} format={formatPan} bipolar color={color} size="sm" onChange={(v) => studio.edit((p) => setMix(p, channel.id, { pan: v }), { key: `pan:${channel.id}` })} />
+        <Knob label={`${channel.name} volume`} value={channel.mix.db} min={-60} max={6} step={0.5} defaultValue={DEFAULT_CHANNEL_DB} format={speakDb} color={color} size="sm" onChange={(v) => studio.edit((p) => setMix(p, channel.id, { db: v }), { key: `db:${channel.id}` })} />
+        {/* which mixer strip this channel is: the same number as on the strip's plate, shown, not edited */}
+        <span className="rack-strip-no" title={`Mixer strip ${row + 1}`}>
+          <span className="visually-hidden">Mixer strip </span>
+          {row + 1}
+        </span>
         {renaming ? (
           <input
             className="rename"
@@ -134,6 +141,7 @@ const RackRow = memo(function RackRow({ channel, row, steps, selected, canEditSt
           <button
             type="button"
             className="channel-name"
+            data-role={channelRole(channel)}
             aria-current={selected || undefined}
             title={`${channelKind(channel)}. ${channel.type === 'inst' ? 'Select to play it and edit its notes.' : 'Select to play it from the keyboard.'}`}
             onClick={() => {
@@ -141,12 +149,13 @@ const RackRow = memo(function RackRow({ channel, row, steps, selected, canEditSt
               if (isMobile && channel.type === 'inst') uiState.setMobilePanel('roll');
             }}
           >
-            {channel.name}
+            <span className="channel-name-text">{channel.name}</span>
+            <Icon name={channelIcon(channel)} size="sm" />
           </button>
         )}
-        <Knob label={`${channel.name} volume`} value={channel.mix.db} min={-60} max={6} step={0.5} defaultValue={DEFAULT_CHANNEL_DB} format={speakDb} color={color} size="sm" onChange={(v) => studio.edit((p) => setMix(p, channel.id, { db: v }), { key: `db:${channel.id}` })} />
-        <Knob label={`${channel.name} pan`} value={channel.mix.pan} min={-1} max={1} step={0.05} defaultValue={0} format={formatPan} bipolar color={color} size="sm" onChange={(v) => studio.edit((p) => setMix(p, channel.id, { pan: v }), { key: `pan:${channel.id}` })} />
-        <MenuButton label={`${channel.name} options`} className="icon-btn" items={menu} align="end" />
+        {/* lights when this is the selected channel, like the bar beside the button in FL's rack */}
+        <span className="rack-select" aria-hidden="true" />
+        <MenuButton label={`${channel.name} options`} className="icon-btn rack-options" items={menu} align="end" />
       </div>
 
       {drum ? (
@@ -196,6 +205,10 @@ const RackRow = memo(function RackRow({ channel, row, steps, selected, canEditSt
 /** An instrument row shows where its notes fall, as a strip under the step columns. Notes are edited in the piano roll. */
 function InstrumentSummary({ channel, steps, onOpen }: { channel: Channel; steps: number; onOpen: () => void }) {
   if (channel.type !== 'inst') return null;
+  // each note is a thin line at its pitch, like the little piano roll FL draws in an instrument's row
+  const lo = channel.notes.reduce((m, n) => Math.min(m, n.n), Infinity);
+  const hi = channel.notes.reduce((m, n) => Math.max(m, n.n), -Infinity);
+  const span = Math.max(1, hi - lo);
   return (
     <button type="button" className="rack-notes" onClick={onOpen} aria-label={`${channel.name}: ${channel.notes.length} notes. Open in the piano roll.`} title="Edit these notes in the piano roll" style={{ '--steps': steps } as React.CSSProperties}>
       {channel.notes.map((n) => (
@@ -205,6 +218,7 @@ function InstrumentSummary({ channel, steps, onOpen }: { channel: Channel; steps
           style={{
             left: `calc(${n.t} * var(--step-w))`,
             width: `calc(${n.d} * var(--step-w))`,
+            top: `${15 + (1 - (n.n - lo) / span) * 65}%`,
             opacity: 0.45 + n.v * 0.55,
           }}
         />
@@ -306,6 +320,11 @@ export function ChannelRack({ isMobile, toolsHost }: { isMobile: boolean; toolsH
             <RackRow key={c.id} channel={c} row={i} steps={steps} selected={c.id === selectedId} canEditSteps={canEditSteps} isMobile={isMobile} cell={cell} onCell={onCell} onOpenEditor={setEditor} last={i === project.channels.length - 1} />
           ))}
           <div className="rack-playhead" aria-hidden="true" />
+        </div>
+        <div className="rack-foot">
+          <MenuButton className="rack-add" items={adders} label="Add a channel at the end">
+            <Icon name="plus" size="sm" />
+          </MenuButton>
         </div>
         {project.channels.length === 0 && <p className="empty">No channels yet. Choose Add channel to start a beat.</p>}
       </div>
