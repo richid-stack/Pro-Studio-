@@ -48,14 +48,16 @@ function paintTimeLines({ ctx, w, h, view, c }: Common, total: number, stepLines
     const bar = s % STEPS_PER_BAR === 0;
     const beat = s % 4 === 0;
     if (!bar && !beat && !(stepLines && view.stepW >= 10)) continue;
-    ctx.fillStyle = bar ? c.gridBar : beat ? c.gridBeat : c.gridStep;
+    ctx.fillStyle = bar ? c.gridBar : c.trackGrid;
+    ctx.globalAlpha = bar || beat ? 1 : 0.5;
     ctx.fillRect(Math.round(stepToX(s, view)), 0, 1, h);
+    ctx.globalAlpha = 1;
   }
 }
 
 export function paintGrid(g: GridPaint): void {
   const { ctx, w, h, view, c } = g;
-  ctx.fillStyle = c.surface;
+  ctx.fillStyle = c.trackA;
   ctx.fillRect(0, 0, w, h);
 
   // rows: with the scale shown, rows outside it are dimmed and the tonic is tinted; otherwise the black keys are
@@ -65,7 +67,7 @@ export function paintGrid(g: GridPaint): void {
     const pc = ((p % 12) + 12) % 12;
     const dim = g.showScale ? !isInScale(p, g.keyPc, g.scale) : isBlackKey(p);
     if (dim) {
-      ctx.fillStyle = c.rowBlack;
+      ctx.fillStyle = c.trackB;
       ctx.fillRect(0, y, w, view.rowH);
     }
     if (g.showScale && pc === g.keyPc) {
@@ -74,7 +76,7 @@ export function paintGrid(g: GridPaint): void {
       ctx.fillRect(0, y, w, view.rowH);
       ctx.globalAlpha = 1;
     }
-    ctx.fillStyle = pc === 0 ? c.gridBar : c.gridStep;
+    ctx.fillStyle = pc === 0 ? c.gridBar : c.trackLine;
     ctx.fillRect(0, y + view.rowH - 1, w, 1);
   }
 
@@ -83,7 +85,7 @@ export function paintGrid(g: GridPaint): void {
   // past the end of the pattern
   const endX = stepToX(g.total, view);
   if (endX < w) {
-    ctx.fillStyle = c.surfaceRaised;
+    ctx.fillStyle = c.ruler;
     ctx.fillRect(endX, 0, w - endX, h);
     ctx.fillStyle = c.gridBar;
     ctx.fillRect(Math.round(endX), 0, 1, h);
@@ -102,6 +104,16 @@ export function paintGrid(g: GridPaint): void {
     ctx.fillStyle = g.color;
     ctx.fillRect(x, y + 1, nw, view.rowH - 2);
     ctx.globalAlpha = 1;
+    // a dark outline and a bright top edge give the note the bevel the step pads have
+    if (nw > 3 && view.rowH >= 8) {
+      ctx.strokeStyle = c.ruler;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + 0.5, y + 1.5, nw - 1, view.rowH - 3);
+      ctx.fillStyle = c.text;
+      ctx.globalAlpha = 0.3;
+      ctx.fillRect(x + 1, y + 2, nw - 2, 1);
+      ctx.globalAlpha = 1;
+    }
     if (n.s) {
       ctx.fillStyle = c.onChannel;
       ctx.fillRect(x, y + 1, Math.min(3, nw), view.rowH - 2);
@@ -138,9 +150,10 @@ export function paintGrid(g: GridPaint): void {
 }
 
 export function paintRuler({ ctx, w, h, view, c }: Common, total: number, fontPx: number): void {
-  ctx.fillStyle = c.surfaceRaised;
+  // near-black strip with large white bar numbers, as in butterDAWg
+  ctx.fillStyle = c.ruler;
   ctx.fillRect(0, 0, w, h);
-  ctx.font = `${fontPx}px ${c.fontMono}`;
+  ctx.font = `600 ${fontPx + 2}px ${c.fontSans}`;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
   const first = Math.max(0, Math.floor(xToStep(0, view)));
@@ -148,19 +161,19 @@ export function paintRuler({ ctx, w, h, view, c }: Common, total: number, fontPx
   for (let s = first; s <= last; s++) {
     const x = Math.round(stepToX(s, view));
     if (s % STEPS_PER_BAR === 0) {
-      ctx.fillStyle = c.gridBar;
+      ctx.fillStyle = c.trackGrid;
       ctx.fillRect(x, 0, 1, h);
       ctx.fillStyle = c.text;
       ctx.fillText(String(s / STEPS_PER_BAR + 1), x + 4, h / 2);
     } else if (s % 4 === 0) {
-      ctx.fillStyle = c.gridBar;
+      ctx.fillStyle = c.trackGrid;
       ctx.fillRect(x, h - Math.round(h * 0.35), 1, Math.round(h * 0.35));
     } else if (view.stepW >= 10) {
-      ctx.fillStyle = c.gridBeat;
+      ctx.fillStyle = c.trackGrid;
       ctx.fillRect(x, h - Math.round(h * 0.18), 1, Math.round(h * 0.18));
     }
   }
-  ctx.fillStyle = c.border;
+  ctx.fillStyle = c.trackLine;
   ctx.fillRect(0, h - 1, w, 1);
 }
 
@@ -188,6 +201,12 @@ export function paintKeys(k: KeysPaint): void {
     if (black) {
       ctx.fillStyle = down ? c.accent : c.keyBlack;
       ctx.fillRect(0, y, w * BLACK_KEY_REACH, view.rowH);
+      if (!down) {
+        ctx.fillStyle = c.keyBlackText;
+        ctx.globalAlpha = 0.25;
+        ctx.fillRect(0, y, w * BLACK_KEY_REACH, 1);
+        ctx.globalAlpha = 1;
+      }
       if (down) {
         ctx.fillStyle = c.accent;
         ctx.fillRect(w * BLACK_KEY_REACH, y, w * (1 - BLACK_KEY_REACH), view.rowH);
@@ -200,10 +219,10 @@ export function paintKeys(k: KeysPaint): void {
         ctx.fillStyle = c.accent;
         ctx.fillRect(0, y, w, view.rowH);
       }
-      if (pc === 0 || pc === 5) {
-        ctx.fillStyle = c.border;
-        ctx.fillRect(0, y + view.rowH - 1, w, 1);
-      }
+      ctx.fillStyle = c.border;
+      ctx.globalAlpha = pc === 0 || pc === 5 ? 1 : 0.35;
+      ctx.fillRect(0, y + view.rowH - 1, w, 1);
+      ctx.globalAlpha = 1;
       if (pc === 0 || labelAll) {
         ctx.fillStyle = down ? c.onChannel : c.keyWhiteText;
         ctx.textAlign = 'right';
@@ -230,12 +249,12 @@ export interface LanePaint extends Common {
 
 export function paintLane(l: LanePaint): void {
   const { ctx, w, h, view, c } = l;
-  ctx.fillStyle = c.surface;
+  ctx.fillStyle = c.trackA;
   ctx.fillRect(0, 0, w, h);
   paintTimeLines(l, l.total, false);
   const endX = stepToX(l.total, view);
   if (endX < w) {
-    ctx.fillStyle = c.surfaceRaised;
+    ctx.fillStyle = c.ruler;
     ctx.fillRect(endX, 0, w - endX, h);
   }
   for (const n of l.notes) {
@@ -258,6 +277,6 @@ export function paintLane(l: LanePaint): void {
       ctx.stroke();
     }
   }
-  ctx.fillStyle = c.border;
+  ctx.fillStyle = c.trackLine;
   ctx.fillRect(0, 0, w, 1);
 }

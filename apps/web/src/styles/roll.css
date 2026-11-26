@@ -53,15 +53,16 @@
     grid-template-rows: var(--control-h-sm) minmax(0, 1fr) var(--roll-lane-h);
     min-width: 0;
     min-height: 0;
-    background: var(--surface-inset);
+    background: var(--ruler);
   }
   .roll-body[data-lane='off'] {
     grid-template-rows: var(--control-h-sm) minmax(0, 1fr);
   }
   .roll-corner {
-    background: var(--surface-2);
-    border-bottom: var(--border-width) solid var(--border-strong);
-    border-right: var(--border-width) solid var(--border-strong);
+    background: var(--plate);
+    border-bottom: var(--border-width) solid var(--bevel-dark);
+    border-right: var(--border-width) solid var(--plate-edge-hi);
+    border-top-left-radius: var(--radius-lg);
   }
   .roll-ruler {
     display: block;
@@ -142,11 +143,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--surface-2);
-    border-top: var(--border-width) solid var(--border-strong);
-    border-right: var(--border-width) solid var(--border-strong);
+    background: var(--plate);
+    border-top: var(--border-width) solid var(--bevel-dark);
+    border-right: var(--border-width) solid var(--plate-edge-hi);
     font-size: var(--text-xs);
-    color: var(--text-muted);
+    color: var(--plate-text);
   }
   .roll-lane {
     min-height: 0;
