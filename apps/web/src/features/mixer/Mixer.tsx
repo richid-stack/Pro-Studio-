@@ -4,6 +4,7 @@ import { clearSolo, formatDb, formatPan, isFeatureVisible, setMasterDb, setMix, 
 import { Fader } from '../../components/Fader';
 import { Knob } from '../../components/Knob';
 import { Meter } from '../../components/Meter';
+import { MixerInserts } from './MixerInserts';
 import { ToolButton, ToolGroup, Toolbar } from '../../components/Toolbar';
 import { DEFAULT_CHANNEL_DB, channelColor } from '../../lib/channels';
 import { studio, useProject } from '../../state/studio';
@@ -12,12 +13,15 @@ import { usePreferences } from '../../state/usePreferences';
 
 const pct = (v: number): string => `${Math.round(v * 100)} percent`;
 
-const Strip = memo(function Strip({ channel, selected, sends }: { channel: Channel; selected: boolean; sends: boolean }) {
+const Strip = memo(function Strip({ channel, index, selected, sends }: { channel: Channel; index: number; selected: boolean; sends: boolean }) {
   const m = channel.mix;
   const color = channelColor(channel);
   const set = (patch: Parameters<typeof setMix>[2], key: string): void => studio.edit((p) => setMix(p, channel.id, patch), { key: `${key}:${channel.id}` });
   return (
     <div className="strip" role="group" aria-label={`${channel.name} mixer strip`} data-selected={selected || undefined} data-muted={m.mute || undefined} style={{ '--ch': color } as React.CSSProperties}>
+      <span className="strip-index" aria-hidden="true">
+        {index}
+      </span>
       <button type="button" className="strip-name" aria-current={selected || undefined} onClick={() => uiState.selectChannel(channel.id)} title={`Select ${channel.name}`}>
         {channel.name}
       </button>
@@ -42,14 +46,16 @@ const Strip = memo(function Strip({ channel, selected, sends }: { channel: Chann
         <Fader label={`${channel.name} volume`} db={m.db} defaultDb={DEFAULT_CHANNEL_DB} color={color} onChange={(v) => set({ db: v }, 'db')} />
         <Meter source={{ channel: channel.id }} label={`${channel.name} level`} />
       </div>
-      <output className="strip-db">{formatDb(m.db)}</output>
-      <div className="strip-buttons">
-        <button type="button" className="btn btn-toggle" data-kind="mute" aria-pressed={m.mute} aria-label={`Mute ${channel.name}`} onClick={() => set({ mute: !m.mute }, 'mute')}>
-          M
-        </button>
-        <button type="button" className="btn btn-toggle" data-kind="solo" aria-pressed={m.solo} aria-label={`Solo ${channel.name}`} onClick={() => set({ solo: !m.solo }, 'solo')}>
-          S
-        </button>
+      <div className="strip-foot">
+        <output className="strip-db">{formatDb(m.db)}</output>
+        <div className="strip-buttons">
+          <button type="button" className="btn btn-toggle" data-kind="mute" aria-pressed={m.mute} aria-label={`Mute ${channel.name}`} onClick={() => set({ mute: !m.mute }, 'mute')}>
+            M
+          </button>
+          <button type="button" className="btn btn-toggle" data-kind="solo" aria-pressed={m.solo} aria-label={`Solo ${channel.name}`} onClick={() => set({ solo: !m.solo }, 'solo')}>
+            S
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -95,12 +101,15 @@ export function Mixer({ toolsHost }: { toolsHost: HTMLElement | null }) {
     <div className="mixer" data-header-tools={toolsHost ? '' : undefined}>
       {toolsHost ? createPortal(toolbar, toolsHost) : <div className="mixer-bar">{toolbar}</div>}
       <div className="mixer-strips">
-        {project.channels.map((c) => (
-          <Strip key={c.id} channel={c} selected={c.id === selected} sends={sends} />
+        {project.channels.map((c, i) => (
+          <Strip key={c.id} channel={c} index={i + 1} selected={c.id === selected} sends={sends} />
         ))}
         {project.channels.length === 0 && <p className="empty">Add a channel and it appears here with its own fader.</p>}
       </div>
       <div className="strip strip-master" role="group" aria-label="Master strip">
+        <span className="strip-index" aria-hidden="true">
+          M
+        </span>
         <span className="strip-name strip-name-static">Master</span>
         {sends && <div className="strip-sends strip-sends-spacer" aria-hidden="true" />}
         <span className="strip-pan-spacer" aria-hidden="true" />
@@ -109,9 +118,12 @@ export function Mixer({ toolsHost }: { toolsHost: HTMLElement | null }) {
           <Meter source={{ master: 'L' }} label="Master level, left" />
           <Meter source={{ master: 'R' }} label="Master level, right" />
         </div>
-        <output className="strip-db">{formatDb(project.masterDb)}</output>
-        <span className="strip-buttons strip-buttons-spacer" aria-hidden="true" />
+        <div className="strip-foot">
+          <output className="strip-db">{formatDb(project.masterDb)}</output>
+          <span className="strip-buttons strip-buttons-spacer" aria-hidden="true" />
+        </div>
       </div>
+      {isFeatureVisible('mixer-inserts-preview', mode) && <MixerInserts channelName={project.channels.find((c) => c.id === selected)?.name ?? null} />}
     </div>
   );
 }

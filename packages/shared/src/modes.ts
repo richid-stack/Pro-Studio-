@@ -89,6 +89,7 @@ export const FEATURES: readonly FeatureDef[] = [
   { id: 'step-editor', label: 'Per-step velocity, ratchet and roll shape', kind: 'tool', from: 'standard' },
   { id: 'velocity-lane', label: 'Velocity lane under the piano roll', kind: 'tool', from: 'standard' },
   { id: 'mixer-sends', label: 'Reverb, delay and duck sends on the mixer', kind: 'tool', from: 'standard' },
+  { id: 'mixer-inserts-preview', label: 'Effect slots panel beside the mixer strips (preview; effects arrive in Phase 2)', kind: 'tool', from: 'standard' },
   { id: 'chord-brain', label: 'Chord brain', kind: 'tool', from: 'standard' },
   { id: 'hihat-designer', label: 'Hi-hat designer', kind: 'tool', from: 'standard' },
   { id: 'dock-layouts', label: 'Dockable, maximizable panels', kind: 'tool', from: 'standard' },
