@@ -6,6 +6,13 @@ export interface CanvasColors {
   surface: string;
   surfaceRaised: string;
   rowBlack: string;
+  trackA: string;
+  trackB: string;
+  trackLine: string;
+  trackGrid: string;
+  ruler: string;
+  plate: string;
+  plateText: string;
   gridBar: string;
   gridBeat: string;
   gridStep: string;
@@ -22,6 +29,7 @@ export interface CanvasColors {
   onChannel: string;
   border: string;
   fontMono: string;
+  fontSans: string;
 }
 
 export function readColors(el: Element): CanvasColors {
@@ -31,6 +39,13 @@ export function readColors(el: Element): CanvasColors {
     surface: get('--surface-inset'),
     surfaceRaised: get('--surface-2'),
     rowBlack: get('--row-black-key'),
+    trackA: get('--track-a'),
+    trackB: get('--track-b'),
+    trackLine: get('--track-line'),
+    trackGrid: get('--track-grid'),
+    ruler: get('--ruler'),
+    plate: get('--plate'),
+    plateText: get('--plate-text'),
     gridBar: get('--grid-bar'),
     gridBeat: get('--grid-beat'),
     gridStep: get('--grid-step'),
@@ -47,6 +62,7 @@ export function readColors(el: Element): CanvasColors {
     onChannel: get('--text-on-channel'),
     border: get('--border-strong'),
     fontMono: get('--font-mono'),
+    fontSans: get('--font-sans'),
   };
 }
 
