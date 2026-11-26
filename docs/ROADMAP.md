@@ -35,7 +35,7 @@ Not built yet (each is a roadmap line, none is faked in the UI):
 - Playlist arrangement (the Playlist panel is labelled Preview and shows one looping pattern; clips arrive in Phase 3).
 - Loading your own samples, the sampler and chopping (the Sampler channel type exists in the data model and in the engine; the UI to load a file does not).
 - Browser: packs, recordings, your files; hover waveform preview; key and BPM detection.
-- Mixer insert slots and the Plugins browser tab (they arrive with the Phase 2 effects).
+- Mixer insert slots and the Plugins browser tab (they arrive with the Phase 2 effects). The slots are shown as a labelled preview panel beside the master strip (`mixer-inserts-preview`, Standard and Pro); the slot rows do nothing yet.
 - Piano roll: resizing from the start edge, ghost notes, scrolling while a drag reaches the edge, recording played notes into the roll, seeking from the ruler with the keyboard.
 - Command palette, tabbed panels.
 - Top-bar controls that are labelled **preview** in the UI (they announce "is a preview and does nothing yet" and carry `data-preview="true"`): PAT / SONG mode, Record, Metronome, Loop, and the pattern selector. They arrive with the engine transport (Phase 2) and the playlist (Phase 3).

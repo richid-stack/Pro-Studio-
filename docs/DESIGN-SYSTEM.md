@@ -60,6 +60,29 @@ Other rules: one focus style for the whole product (`:focus-visible`, 2 px, `--f
 - **Names** are a closed union (`IconName`); `ICON_NAMES` feeds the contact sheet used to review the set in both themes. Add an icon by drawing it on the grid, adding the name, and checking it on the sheet at all three sizes.
 - Icon-only controls still need an accessible name (the icon is `aria-hidden`).
 
+## Hardware parts
+
+The panels share a few physical parts, all built from tokens (no hex in components). Dark and light have a value each.
+
+- **Plate** (`--plate`, `--plate-edge`, `--plate-edge-hi`, `--plate-text`): the grey header block on a playlist lane, a mixer strip's index and the piano roll's corner. Text on it is `--plate-text`.
+- **Lamp** (`.lamp`, shared by the rack, playlist and mixer): a round LED in a dark bezel (`--lamp-ring`). Lit (`--led-on`) means audible; muted goes dark (`--led-off`). It is a real button with a name and `aria-pressed`; the touch target is the full hit area, not the small dot.
+- **Strip** (`--strip-bg`, `--strip-edge`, `--strip-groove`), **sidebar** (`--sidebar-bg`), **lanes** (`--track-a/b`, `--track-line`, `--track-grid`) and the ruler (`--ruler`): flat fills with the same values butterDAWg uses.
+- **Hover** on a row is `--hover-tint`.
+
+### Channel rack
+
+The rack follows the owner's reference picture of FL Studio's channel rack, because butterDAWg has no rack or piano roll to copy. Left to right in a row: lamp, pan knob, volume knob, mixer strip number, channel button, select bar, options. Then 16 pads in groups of four.
+
+- **Body** `--rack-body`. **Channel button** colour by kind: drum `--chan-drum`, instrument `--chan-inst`, sample `--chan-sample`, selected `--chan-selected` with a white outline; name on the left, the kind's icon on the right, and a thin stripe in the channel's own colour at the left edge. Text is `--chan-text`.
+- **Pads:** off grey (`--pad-off-a`) in groups 1 and 3 and maroon (`--pad-off-b`) in groups 2 and 4; on is pale blue (`--pad-on-a`) or pink (`--pad-on-b`), mixed in by velocity. The light theme flips this (on is dark) so on and off stay apart at 3:1.
+- **Instrument rows** are a dark panel (`--pad-edge`) with one green line per note at its pitch, a small piano roll. Click it to open the piano roll.
+- **Select bar** gets a lime outline on the selected channel. The strip number is shown, not edited, and the "+" under the rack adds a channel.
+- The decorative bars above the columns in the reference are left out: they would be controls that do nothing.
+
+### Capturing butterDAWg
+
+The real app is run under xvfb with Electron and driven with Playwright's `_electron.launch`, so values are sampled from its pixels rather than guessed. Pair counts in the contrast gate are 206 per theme. Mixer insert slots are a labelled **preview** until Phase 2.
+
 ## Panel toolbars
 
 Every panel carries its tools as icons in its title bar (`components/Toolbar.tsx`: `Toolbar`, `ToolGroup`, `ToolButton`). The look follows butterDAWg: a quiet grey icon, and on hover, focus or when on, a 2 px outline and the icon in the tool's own colour.
@@ -80,4 +103,4 @@ A screen is accepted per the release gate in the standard: screenshots at 390, 7
 
 ## Provenance
 
-The colour values, bevel and lit-button treatment, and the overall "hardware panel on a desk" language follow the owner's repository butterDAWg (github.com/richid-stack/butterDAWg, MIT licence). What we took is the design language: tokens and values re-expressed in our own semantic token names and our own CSS. We did not copy its source files, and every icon is drawn here. Do not import from it (see `CLAUDE.md` rule 9). Before a public release, copy its licence and copyright line verbatim into the credits page (Phase 8 audit); this has not been done yet because the licence text was not reachable when this was written.
+The colour values, bevel and lit-button treatment, and the overall "hardware panel on a desk" language follow the owner's repository butterDAWg (github.com/richid-stack/butterDAWg, MIT licence, "Copyright (c) 2022 Jan Bessler"). What we took is the design language: tokens and values re-expressed in our own semantic token names and our own CSS. We did not copy its source files, and every icon is drawn here. Do not import from it (see `CLAUDE.md` rule 9). Before a public release, copy its licence and copyright line verbatim into the credits page (Phase 8 audit). The channel rack follows the owner's reference image, not butterDAWg.

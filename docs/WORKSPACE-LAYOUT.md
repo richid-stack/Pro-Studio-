@@ -15,6 +15,8 @@ The panel set, where each panel sits, and the vocabulary. These are workflow con
 | Playlist | Top, right of centre | Track list on the left, timeline with bar numbers, pattern clips, audio clips and automation clips |
 | Mixer | Bottom, full width | Vertical strips with fader, pan, meter, mute, solo; a master strip; insert effect slots on the selected strip |
 
+Heights: a preset's own heights are sized for a tall screen. On a shorter one (`fitLayout`) the mixer and the top row give up height in proportion until the piano roll has `ROLL_COMFORT_H` (260 px), down to their minimums. Heights the user has dragged to are kept, down to the hard minimums. On a short screen the mixer strips scroll to reach their fader and M/S row.
+
 Workspace presets: **Beat** (above), **Arrange** (playlist large), **Mix** (mixer large), **Performance** (pads and keys). Every panel can be resized, scrolled, zoomed and maximized (double-click the header or `Shift+F`); the piano roll also has a focus mode. Below the tablet breakpoint the workspace becomes one panel at a time with bottom navigation, designed for touch rather than shrunk.
 
 ## The browser in use
@@ -47,6 +49,7 @@ Each panel's tools live in its title bar (see `docs/DESIGN-SYSTEM.md`, Panel too
 - **Piano roll:** channel, draw, select, erase and pan tools; snap with its grid, quantize, slide (808 only) and delete; time and pitch zoom; scale highlight and follow playhead.
 - **Channel rack:** add channel and the channel and step count.
 - **Mixer:** Unmute all and Clear solo (both undoable project edits; each is disabled when it has nothing to do).
+  The selected strip's insert slots (right of the master) are a labelled **preview**: they say so and do nothing until Phase 2.
 - **Browser:** preview-on-select and collapse all folders.
 - **Playlist:** draw, paint, delete, mute, slice, select and snap. These are **previews**: they light up and say so, and place nothing until clips arrive in Phase 3.
 
