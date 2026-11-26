@@ -46,10 +46,10 @@ export interface WorkspaceLayout {
 export type LayoutPresetId = 'beat' | 'arrange' | 'mix' | 'perform';
 
 export const LAYOUT_PRESETS: Readonly<Record<LayoutPresetId, { label: string; layout: WorkspaceLayout }>> = {
-  beat: { label: 'Beat', layout: { browserW: 232, rackW: 600, topH: 208, mixerH: 196, hidden: [], maximized: null, floating: {}, stack: [], folded: [] } },
+  beat: { label: 'Beat', layout: { browserW: 232, rackW: 680, topH: 208, mixerH: 264, hidden: [], maximized: null, floating: {}, stack: [], folded: [] } },
   arrange: { label: 'Arrange', layout: { browserW: 200, rackW: 400, topH: 420, mixerH: 150, hidden: [], maximized: null, floating: {}, stack: [], folded: [] } },
   mix: { label: 'Mix', layout: { browserW: 200, rackW: 360, topH: 190, mixerH: 400, hidden: [], maximized: null, floating: {}, stack: [], folded: [] } },
-  perform: { label: 'Perform', layout: { browserW: 232, rackW: 600, topH: 150, mixerH: 150, hidden: ['playlist'], maximized: null, floating: {}, stack: [], folded: [] } },
+  perform: { label: 'Perform', layout: { browserW: 232, rackW: 680, topH: 150, mixerH: 150, hidden: ['playlist'], maximized: null, floating: {}, stack: [], folded: [] } },
 };
 
 export const MIN_BROWSER_W = 160;
@@ -58,6 +58,8 @@ export const MIN_RACK_W = 300;
 export const MIN_PLAYLIST_W = 220;
 export const MIN_TOP_H = 120;
 export const MIN_ROLL_H = 160;
+/** The piano roll's panel height at which it is comfortable to edit in: its header, ruler, a few pitch rows and the velocity lane. */
+export const ROLL_COMFORT_H = 260;
 export const MIN_MIXER_H = 110;
 export const SPLITTER = 6;
 
@@ -75,10 +77,29 @@ export function fitLayout(l: WorkspaceLayout, vp: Viewport): WorkspaceLayout {
   const showPlaylist = !l.hidden.includes('playlist');
   const rackW = clamp(l.rackW, MIN_RACK_W, Math.max(MIN_RACK_W, showPlaylist ? stageW - MIN_PLAYLIST_W - SPLITTER : stageW));
   const stageH = vp.height - vp.barH;
-  const mixerH = l.hidden.includes('mixer') ? 0 : clamp(l.mixerH, MIN_MIXER_H, Math.max(MIN_MIXER_H, stageH - MIN_TOP_H - MIN_ROLL_H - 2 * SPLITTER));
+  const [wantMixer, wantTop] = easeDefaultHeights(l, stageH);
+  const mixerH = l.hidden.includes('mixer') ? 0 : clamp(wantMixer, MIN_MIXER_H, Math.max(MIN_MIXER_H, stageH - MIN_TOP_H - MIN_ROLL_H - 2 * SPLITTER));
   const room = stageH - mixerH - (mixerH > 0 ? SPLITTER : 0) - SPLITTER;
-  const topH = clamp(l.topH, MIN_TOP_H, Math.max(MIN_TOP_H, room - MIN_ROLL_H));
+  const topH = clamp(wantTop, MIN_TOP_H, Math.max(MIN_TOP_H, room - MIN_ROLL_H));
   return { ...l, browserW, rackW, topH, mixerH };
+}
+
+/**
+ * A preset's own heights are sized for a tall screen. On a shorter one they give up height, mixer and top row in
+ * proportion to what each has above its minimum, so the piano roll keeps a comfortable height. Heights the user
+ * has dragged to are theirs: only the hard minimums apply to those.
+ */
+function easeDefaultHeights(l: WorkspaceLayout, stageH: number): [number, number] {
+  const mixer = l.hidden.includes('mixer') ? 0 : l.mixerH;
+  const isPreset = Object.values(LAYOUT_PRESETS).some((p) => p.layout.mixerH === l.mixerH && p.layout.topH === l.topH);
+  if (!isPreset) return [mixer, l.topH];
+  const spare = mixer + l.topH - (stageH - ROLL_COMFORT_H - SPLITTER * (mixer > 0 ? 2 : 1));
+  const slackMixer = Math.max(0, mixer - MIN_MIXER_H);
+  const slackTop = Math.max(0, l.topH - MIN_TOP_H);
+  const slack = slackMixer + slackTop;
+  if (spare <= 0 || slack === 0) return [mixer, l.topH];
+  const cut = Math.min(spare, slack);
+  return [Math.round(mixer - (cut * slackMixer) / slack), Math.round(l.topH - (cut * slackTop) / slack)];
 }
 
 export function toggleHidden(l: WorkspaceLayout, id: PanelId): WorkspaceLayout {

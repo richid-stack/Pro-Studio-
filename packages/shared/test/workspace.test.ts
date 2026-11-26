@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { LAYOUT_PRESETS, MIN_BROWSER_W, MIN_MIXER_H, MIN_RACK_W, MIN_ROLL_H, MIN_TOP_H, SPLITTER, fitLayout, isMobileWidth, setMaximized, splitterStep, toggleHidden } from '../src/index';
+import { LAYOUT_PRESETS, MIN_BROWSER_W, MIN_MIXER_H, MIN_RACK_W, MIN_ROLL_H, MIN_TOP_H, ROLL_COMFORT_H, SPLITTER, fitLayout, isMobileWidth, setMaximized, splitterStep, toggleHidden } from '../src/index';
 
 const beat = LAYOUT_PRESETS.beat.layout;
 
@@ -18,6 +18,20 @@ describe('fitLayout', () => {
         assert.ok(rollH >= MIN_ROLL_H - 1 || h < 700, `${w}x${h} ${preset.label}: roll ${rollH}px`);
       }
     }
+  });
+  it('a preset gives up height on a laptop so the piano roll stays comfortable', () => {
+    for (const [w, h] of [[1280, 720], [1366, 768], [1440, 900]] as const) {
+      const f = fitLayout(beat, { width: w, height: h, barH: 120 });
+      const rollH = h - 120 - f.topH - f.mixerH - 2 * SPLITTER;
+      assert.ok(rollH >= ROLL_COMFORT_H - 1, `${w}x${h}: roll ${rollH}px`);
+      assert.ok(f.topH >= MIN_TOP_H && f.mixerH >= MIN_MIXER_H, `${w}x${h} minimums`);
+    }
+  });
+  it('heights the user dragged to are kept, down to the hard minimums', () => {
+    const mine = { ...beat, topH: 233, mixerH: 301 };
+    const f = fitLayout(mine, { width: 1366, height: 768, barH: 120 });
+    const rollH = 768 - 120 - f.topH - f.mixerH - 2 * SPLITTER;
+    assert.ok(rollH >= MIN_ROLL_H - 1 && rollH < ROLL_COMFORT_H, `roll ${rollH}px`);
   });
   it('a layout saved on a huge monitor shrinks to fit a laptop', () => {
     const big = { ...beat, browserW: 400, rackW: 1200, topH: 700, mixerH: 600 };
