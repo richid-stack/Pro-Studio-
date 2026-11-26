@@ -1,10 +1,10 @@
 import { createPortal } from 'react-dom';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { STEPS_PER_BAR, STEP_TICKS, totalSteps, type Channel, type Project } from '@pro-studio/shared';
+import { STEPS_PER_BAR, STEP_TICKS, setMix, totalSteps, type Channel, type Project } from '@pro-studio/shared';
 import { audioHost } from '../../audio/audioHost';
 import { channelColorValue, fitCanvas, lengthToken, readColors } from '../../lib/canvasTheme';
 import { preferences } from '../../state/preferences';
-import { useProject } from '../../state/studio';
+import { studio, useProject } from '../../state/studio';
 import { ToolButton, ToolGroup, Toolbar, type ToolHue } from '../../components/Toolbar';
 import type { IconName } from '../../components/Icon';
 import { transport } from '../../state/transport';
@@ -16,38 +16,54 @@ function drawPattern(canvas: HTMLCanvasElement, project: Project, width: number,
   const c = readColors(canvas);
   const steps = totalSteps(project);
   const per = width / steps;
-  ctx.fillStyle = c.surface;
+  // lanes are one flat teal and carry on past the last channel, so an empty track still reads as a track
+  ctx.fillStyle = c.trackA;
   ctx.fillRect(0, 0, width, height);
+  for (let y = lane - 1; y < height; y += lane) {
+    ctx.fillStyle = c.trackLine;
+    ctx.fillRect(0, y, width, 1);
+  }
+  // a soft line every beat and a wider one every bar, under the clips
+  for (let s = 0; s <= steps; s += 4) {
+    const bar = s % STEPS_PER_BAR === 0;
+    ctx.fillStyle = c.trackGrid;
+    ctx.fillRect(Math.round(s * per) - (bar ? 1 : 0), 0, bar ? 2 : 1, height);
+  }
+  /** A clip: translucent body, a bright top edge and a dark outline, like butterDAWg's. */
+  const clip = (x: number, y: number, w: number, h: number, alpha: number): void => {
+    ctx.globalAlpha = alpha;
+    ctx.fillRect(x, y, w, h);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = c.border;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, Math.max(0, w - 1), Math.max(0, h - 1));
+    if (w > 2) {
+      ctx.fillStyle = c.text;
+      ctx.globalAlpha = 0.3;
+      ctx.fillRect(x + 1, y + 1, w - 2, 1);
+      ctx.globalAlpha = 1;
+    }
+  };
   project.channels.forEach((ch: Channel, i) => {
     const y = i * lane;
-    if (i % 2 === 1) {
-      ctx.fillStyle = c.rowBlack;
-      ctx.fillRect(0, y, width, lane);
-    }
-    ctx.fillStyle = channelColorValue(canvas, ch.color);
+    const color = channelColorValue(canvas, ch.color);
     if (ch.type === 'drum') {
       ch.v.forEach((v, s) => {
         if (v <= 0 || s >= steps) return;
-        ctx.globalAlpha = 0.45 + v * 0.55;
-        ctx.fillRect(s * per + 0.5, y + 3, Math.max(1, per - 1), lane - 6);
+        ctx.fillStyle = color;
+        clip(s * per + 0.5, y + 3, Math.max(2, per - 1), lane - 7, 0.5 + v * 0.5);
       });
     } else if (ch.notes.length > 0) {
       const lo = Math.min(...ch.notes.map((n) => n.n));
       const hi = Math.max(...ch.notes.map((n) => n.n));
       const span = Math.max(1, hi - lo);
       for (const n of ch.notes) {
-        ctx.globalAlpha = 0.45 + n.v * 0.55;
-        const ny = y + 3 + (1 - (n.n - lo) / span) * (lane - 9);
-        ctx.fillRect(n.t * per, ny, Math.max(1.5, n.d * per - 1), 3);
+        const ny = y + 3 + (1 - (n.n - lo) / span) * (lane - 11);
+        ctx.fillStyle = color;
+        clip(n.t * per, ny, Math.max(2.5, n.d * per - 1), 4, 0.55 + n.v * 0.45);
       }
     }
-    ctx.globalAlpha = 1;
   });
-  // bar and beat lines over the top
-  for (let s = 0; s <= steps; s += 4) {
-    ctx.fillStyle = s % STEPS_PER_BAR === 0 ? c.gridBar : c.gridBeat;
-    ctx.fillRect(Math.round(s * per), 0, 1, height);
-  }
 }
 
 /**
@@ -165,6 +181,7 @@ export function Playlist({ toolsHost }: { toolsHost: HTMLElement | null }) {
         <div className="playlist-corner" aria-hidden="true" />
         <div
           className="playlist-ruler"
+          style={{ '--bars': bars } as React.CSSProperties}
           role="slider"
           tabIndex={0}
           aria-label="Playhead position. Use the arrow keys to move one step."
@@ -192,8 +209,16 @@ export function Playlist({ toolsHost }: { toolsHost: HTMLElement | null }) {
         </div>
         <ul className="playlist-lanes" aria-label="Channels in the pattern">
           {project.channels.map((c) => (
-            <li key={c.id} className="lane-name" style={{ '--ch': `var(--${c.color})` } as React.CSSProperties}>
-              {c.name}
+            <li key={c.id} className="lane-name" data-muted={c.mix.mute || undefined} style={{ '--ch': `var(--${c.color})` } as React.CSSProperties}>
+              <span className="lane-label">{c.name}</span>
+              <button
+                type="button"
+                className="lamp"
+                aria-pressed={c.mix.mute}
+                aria-label={`Mute ${c.name}`}
+                title={c.mix.mute ? `Unmute ${c.name}` : `Mute ${c.name}`}
+                onClick={() => studio.edit((p) => setMix(p, c.id, { mute: !c.mix.mute }), { key: `mute:${c.id}` })}
+              />
             </li>
           ))}
         </ul>
