@@ -187,6 +187,32 @@
   --track-b: #2e3e48;
   --ruler: #192328;
 
+  /* hardware parts taken from butterDAWg's panels: grey header plates, mixer strips, the sidebar well, step pads */
+  --plate: #646e73;
+  --plate-edge: #5c666b;
+  --plate-edge-hi: #6e7887;
+  --plate-text: #ffffff;
+  --lamp-ring: #0d1418;
+  --strip-bg: #374045;
+  --strip-edge: #313a40;
+  --strip-groove: #30393e;
+  --sidebar-bg: #161f24;
+  --hover-tint: rgb(89 123 159 / 0.28);
+  --track-line: #1f2f39;
+  --track-grid: #2d3d47;
+  /* channel rack, from the reference screenshot: grey body, two-tone step pads, coloured channel buttons */
+  --rack-body: #5e696f;
+  --pad-off-a: #3c4650;
+  --pad-off-b: #5a3a3e;
+  --pad-on-a: #b3c7d3;
+  --pad-on-b: #e8b0b3;
+  --pad-edge: #1d2429;
+  --chan-text: #ffffff;
+  --chan-drum: #403da3;
+  --chan-inst: #6a4a9e;
+  --chan-sample: #5a5c78;
+  --chan-selected: #1a76b2;
+
   /* on-screen piano */
   --key-white: #e9eff2;
   --key-white-text: #2a373d;
@@ -297,6 +323,30 @@
   --track-a: #dbe4e8;
   --track-b: #d1dce1;
   --ruler: #c7d3d9;
+
+  --plate: #b3bfc5;
+  --plate-edge: #9fadb4;
+  --plate-edge-hi: #c8d2d7;
+  --plate-text: #10181c;
+  --lamp-ring: #0d1418;
+  --strip-bg: #cdd8dd;
+  --strip-edge: #aebbc2;
+  --strip-groove: #aebbc2;
+  --sidebar-bg: #e9eff2;
+  --hover-tint: rgb(60 100 140 / 0.16);
+  --track-line: #aebbc2;
+  --track-grid: #bcc8ce;
+  --rack-body: #d3dadf;
+  --pad-off-a: #9fb0ba;
+  --pad-off-b: #d2aeb3;
+  --pad-on-a: #2c566f;
+  --pad-on-b: #8f2f3c;
+  --pad-edge: #1d2429;
+  --chan-text: #ffffff;
+  --chan-drum: #403da3;
+  --chan-inst: #6a4a9e;
+  --chan-sample: #5a5c78;
+  --chan-selected: #1a76b2;
 
   --key-white: #ffffff;
   --key-white-text: #2a373d;
